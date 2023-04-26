@@ -8,7 +8,9 @@ find_package(cxxopts CONFIG REQUIRED)
 
 
 add_compile_options("-lfmt")
-add_executable(SAT_Solver main.cpp)
+add_executable(SAT_Solver main.cpp io_utils.h io_utils.cpp)
+
+add_subdirectory(test)
 
 target_link_libraries(SAT_Solver PRIVATE cxxopts::cxxopts)
 

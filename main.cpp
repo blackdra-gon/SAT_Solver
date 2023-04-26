@@ -1,6 +1,7 @@
 #include <iostream>
 #include "lorina/dimacs.hpp"
 #include "lorina/diagnostics.hpp"
+#include "io_utils.h"
 #include <cxxopts.hpp>
 
 
@@ -91,6 +92,7 @@ void solve(Cnf &cnf) {
         if (checkAssignment(cnf.clauses, possible_solution)) {
             std::cout << "SAT" << std::endl;
             std::cout << possible_solution << std::endl;
+            std::cout << output_dimacs(bitset_to_vector(possible_solution)) << std::endl;
             return;
         }
     }
