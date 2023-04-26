@@ -1,6 +1,7 @@
 #include <iostream>
 #include "lorina/dimacs.hpp"
 #include "lorina/diagnostics.hpp"
+#include <cxxopts.hpp>
 
 
 
@@ -96,9 +97,33 @@ void solve(Cnf &cnf) {
     std::cout << "UNSAT" << std::endl;
 }
 
-int main() {
+int main(int argc, char** argv) {
     Cnf cnf;
-    lorina::read_dimacs("../example_dimacs/random_10_5.cnf", Reader(cnf));
+    // Read the file given as first positional argument, use stdin if no argument given
+    cxxopts::Options options("SAT_Solver", "A sat-solver programmed for a TCS Seminar by Benjamin Hennies ");
+    options.add_options()
+            ("file", "file containing a cnf formula in dimacs format", cxxopts::value<std::string>());
+    options.parse_positional("file");
+    auto result = options.parse(argc, argv);
+    if ( result.count("file") ) {
+        std::string input_file = result["file"].as<std::string>();
+        auto parse_cnf_result = lorina::read_dimacs(input_file, Reader(cnf));
+        if (parse_cnf_result == lorina::return_code::parse_error) {
+            std::cout << "Lorina parse error, when trying to parse " << input_file << std::endl;
+            return 1;
+        }
+    // Get input from stdin
+    } else {
+        auto parse_cnf_result = lorina::read_dimacs(std::cin, Reader(cnf));
+        if (parse_cnf_result == lorina::return_code::parse_error) {
+            std::cout << "Lorina parse error, when trying to parse from stdin" << std::endl;
+            return 1;
+        }
+
+    }
+
+
+
     for (const auto& clause : cnf.clauses) {
         std::cout << "clause" << std::endl;
         for (auto literal : clause) {
