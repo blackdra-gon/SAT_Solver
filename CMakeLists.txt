@@ -9,7 +9,7 @@ find_package(cxxopts CONFIG REQUIRED)
 
 
 add_compile_options("-lfmt")
-add_executable(SAT_Solver main.cpp io_utils.cpp easylogging++.cc)
+add_executable(SAT_Solver main.cpp io_utils.cpp easylogging++.cc dpll.cpp)
 
 add_subdirectory(test)
 
