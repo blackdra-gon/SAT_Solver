@@ -1,67 +1,13 @@
 #include <iostream>
+
 #include "lorina/dimacs.hpp"
-#include "lorina/diagnostics.hpp"
-#include "io_utils.h"
 #include <cxxopts.hpp>
+#include "easylogging++.h"
 
-
-
-using Clause = std::vector<unsigned int>;
-
-struct Cnf {
-    std::vector<Clause> clauses;
-    int number_of_variables;
-};
+#include "io_utils.h"
+#include "solver_structs.h"
 
 const int MAX_NUMBER_OF_VARIABLES = 64;
-
-
-class Reader : public lorina::dimacs_reader
-{
-private:
-    Cnf &cnf;
-
-public:
-    Reader(Cnf &cnf) : cnf(cnf) {}
-
-    void on_format(const std::string &format) const override
-    {
-        std::cout << format << std::endl;
-    };
-
-    void on_number_of_clauses(uint64_t number_of_clauses) const override
-    {
-
-    }
-
-    void on_number_of_variables(uint64_t number_of_variables) const override
-    {
-        cnf.number_of_variables = number_of_variables;
-    }
-    void on_clause(const std::vector<int> &clause_input) const override
-    {
-        Clause clause_store;
-
-        for (int literal: clause_input) {
-            literal *= 2;
-            if (literal < 0) {
-                literal = literal * -1 + 1;
-            }
-            literal -= 2;
-            clause_store.push_back(static_cast<unsigned int>(literal));
-        }
-        cnf.clauses.push_back(clause_store);
-
-
-    }
-    void on_end() const override
-    {
-
-    }
-
-
-};
-
 
 bool literalSatisfied(unsigned int literal, const std::bitset<MAX_NUMBER_OF_VARIABLES> &assignment) {
     unsigned int variable_index = literal >> 1;
@@ -99,6 +45,8 @@ void solve(Cnf &cnf) {
     std::cout << "UNSAT" << std::endl;
 }
 
+INITIALIZE_EASYLOGGINGPP
+
 int main(int argc, char** argv) {
     Cnf cnf;
     // Read the file given as first positional argument, use stdin if no argument given
@@ -109,16 +57,18 @@ int main(int argc, char** argv) {
     auto result = options.parse(argc, argv);
     if ( result.count("file") ) {
         std::string input_file = result["file"].as<std::string>();
-        auto parse_cnf_result = lorina::read_dimacs(input_file, Reader(cnf));
-        if (parse_cnf_result == lorina::return_code::parse_error) {
-            std::cout << "Lorina parse error, when trying to parse " << input_file << std::endl;
+        try {
+            cnf = import_from_file(input_file);
+        } catch (std::exception &e) {
+            LOG(FATAL) << e.what();
             return 1;
         }
+
     // Get input from stdin
     } else {
         auto parse_cnf_result = lorina::read_dimacs(std::cin, Reader(cnf));
         if (parse_cnf_result == lorina::return_code::parse_error) {
-            std::cout << "Lorina parse error, when trying to parse from stdin" << std::endl;
+            LOG(FATAL) << "Lorina parse error, when trying to parse from stdin" << std::endl;
             return 1;
         }
 

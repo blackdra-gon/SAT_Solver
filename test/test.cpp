@@ -9,3 +9,7 @@ TEST_CASE("Output in dimacs format") {
     std::vector<bool> assignment = {0,1,0,1};
     REQUIRE(output_dimacs({0,1,0,1}) == "v -1 2 -3 4");
 }
+
+TEST_CASE("Apply Unit Propagation") {
+
+}

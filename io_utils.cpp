@@ -23,3 +23,12 @@ std::vector<bool> bitset_to_vector(std::bitset<64> bitset) {
     }
     return bool_vector;
 }
+
+Cnf import_from_file(std::string filename) {
+    Cnf cnf;
+    auto parse_cnf_result = lorina::read_dimacs(filename, Reader(cnf));
+    if (parse_cnf_result == lorina::return_code::parse_error) {
+        throw std::runtime_error("Lorina parse error, when trying to parse " + filename);
+    }
+    return cnf;
+}
