@@ -1,8 +1,15 @@
 {
   "name" : "sat-solver",
   "version-string" : "1.0.0",
-  "builtin-baseline" : "70992f64912b9ab0e60e915ab7421faa197524b7",
+  "builtin-baseline" : "eebcbc7ca3f4ef825b14949e0b702a7517ab8565",
   "dependencies" : [ {
+    "name" : "catch2",
+    "version>=" : "3.3.2"
+  }, {
+    "name" : "cxxopts",
+    "version>=" : "3.1.1",
+    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(cxxopts CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE cxxopts::cxxopts)\n"
+  }, {
     "name" : "easyloggingpp",
     "version>=" : "9.97.0#2"
   } ]

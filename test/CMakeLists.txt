@@ -1,3 +1,5 @@
-find_package(Catch2 3 REQUIRED)
+set(CMAKE_FIND_DEBUG_MODE 1)
+#list(APPEND CMAKE_MODULE_PATH "/home/benjamin/Documents/Programmieren/SAT_Solver/cmake-build-debug/vcpkg_installed/x64-linux/share/catch2/")
+find_package(Catch2 CONFIG REQUIRED)
 add_executable(tests test.cpp ../io_utils.cpp ../dpll.cpp ../easylogging++.cc)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
