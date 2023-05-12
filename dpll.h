@@ -7,7 +7,7 @@
 
 #include "solver_structs.h"
 
-Cnf apply_unit_propagation(const Cnf&);
+Cnf apply_unit_propagation(Cnf&);
 
 
 #endif //SAT_SOLVER_DPLL_H

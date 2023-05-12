@@ -12,5 +12,8 @@
   }, {
     "name" : "easyloggingpp",
     "version>=" : "9.97.0#2"
+  }, {
+    "name" : "fmt",
+    "version>=" : "9.1.0#1"
   } ]
 }

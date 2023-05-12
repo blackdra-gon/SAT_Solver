@@ -6,15 +6,18 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories("/home/benjamin/Documents/Programmieren/lorina/include")
 #set(CMAKE_FIND_DEBUG_MODE 1)
 find_package(cxxopts CONFIG REQUIRED)
+#find_package(fmt CONFIG REQUIRED)
 
 
 
 
-add_executable(SAT_Solver main.cpp io_utils.cpp easylogging++.cc dpll.cpp)
+
+add_executable(SAT_Solver main.cpp io_utils.cpp easylogging++.cc dpll.cpp encoding_util.cpp)
 
 add_subdirectory(test)
 
 target_link_libraries(SAT_Solver PRIVATE cxxopts::cxxopts)
+#target_link_libraries(SAT_Solver PRIVATE fmt::fmt)
 
 
 
