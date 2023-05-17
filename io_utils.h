@@ -13,6 +13,7 @@
 #include "easylogging++.h"
 
 #include "solver_structs.h"
+#include "encoding_util.h"
 
 class Reader : public lorina::dimacs_reader
 {
@@ -41,12 +42,7 @@ public:
         Clause clause_store;
 
         for (int literal: clause_input) {
-            literal *= 2;
-            if (literal < 0) {
-                literal = literal * -1 + 1;
-            }
-            literal -= 2;
-            clause_store.push_back(static_cast<unsigned int>(literal));
+            clause_store.push_back(internal_representation(literal));
         }
         cnf.clauses.push_back(clause_store);
 

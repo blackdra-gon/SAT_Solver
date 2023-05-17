@@ -5,8 +5,12 @@
 #ifndef SAT_SOLVER_ENCODING_UTIL_H
 #define SAT_SOLVER_ENCODING_UTIL_H
 
-#include <cstdint>
+#include "solver_structs.h"
 
-uint64_t negate_literal(uint64_t literal);
+Variable_t negate_literal(Variable_t literal);
+
+Variable_t internal_representation(int input);
+
+int dimacs_format(Variable_t internal_variable);
 
 #endif //SAT_SOLVER_ENCODING_UTIL_H

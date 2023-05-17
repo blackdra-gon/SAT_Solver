@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 project(SAT_Solver)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 #include("/home/benjamin/.clion-vcpkg/vcpkg/scripts/buildsystems/vcpkg.cmake")
 include_directories("/home/benjamin/Documents/Programmieren/lorina/include")
 #set(CMAKE_FIND_DEBUG_MODE 1)
@@ -12,7 +12,7 @@ find_package(cxxopts CONFIG REQUIRED)
 
 
 
-add_executable(SAT_Solver main.cpp io_utils.cpp easylogging++.cc dpll.cpp encoding_util.cpp)
+add_executable(SAT_Solver main.cpp io_utils.cpp easylogging++.cc dpll.cpp encoding_util.cpp solver_structs.cpp)
 
 add_subdirectory(test)
 

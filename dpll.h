@@ -6,8 +6,11 @@
 #define SAT_SOLVER_DPLL_H
 
 #include "solver_structs.h"
-
-Cnf apply_unit_propagation(Cnf&);
+/*
+ * Returns true, when unit propagation was successfull without conflict.
+ * Reurns false, when a conflict was detected
+ */
+bool apply_unit_propagation(Cnf &cnf);
 
 
 #endif //SAT_SOLVER_DPLL_H

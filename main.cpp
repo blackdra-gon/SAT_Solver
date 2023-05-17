@@ -6,6 +6,7 @@
 
 #include "io_utils.h"
 #include "solver_structs.h"
+#include "encoding_util.h"
 
 const int MAX_NUMBER_OF_VARIABLES = 64;
 
@@ -79,7 +80,7 @@ int main(int argc, char** argv) {
     for (const auto& clause : cnf.clauses) {
         std::cout << "clause" << std::endl;
         for (auto literal : clause) {
-            std::cout << literal << " ";
+            std::cout << dimacs_format(literal) << " ";
         }
         std::cout << std::endl;
     }
