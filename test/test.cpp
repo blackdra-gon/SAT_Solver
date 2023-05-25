@@ -37,6 +37,12 @@ TEST_CASE("Apply Unit Propagation") {
     CHECK(cnf_2_after == cnf_2_before);
     Assignments expected_assignments_2 = from_dimacs_list( {1});
     CHECK(cnf_2_before.assignments == expected_assignments_2);
+    // Unittest for detecting conflicts
+    Cnf conflict = import_from_file("../../example_dimacs/unit_propagation_test_simple_conflict.cnf");
+    CHECK(!apply_unit_propagation(conflict));
+    // function applied to empty clause list
+    Cnf cnf_empty;
+    CHECK(apply_unit_propagation(cnf_empty));
 }
 
 TEST_CASE("Negate Literal") {

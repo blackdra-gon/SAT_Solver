@@ -39,9 +39,12 @@ struct Assignment {
 
 };
 
+using Assignments = std::vector<Assignment>;
+
 std::ostream& operator<<(std::ostream& os, const Assignment& output);
 
-using Assignments = std::vector<Assignment>;
+std::ostream& operator<<(std::ostream& os, const Assignments& output);
+
 
 Assignments from_dimacs_list(const std::vector<int>& assignment_list);
 

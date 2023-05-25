@@ -7,6 +7,7 @@
 #include "io_utils.h"
 #include "solver_structs.h"
 #include "encoding_util.h"
+#include "dpll.h"
 
 const int MAX_NUMBER_OF_VARIABLES = 64;
 
@@ -84,7 +85,7 @@ int main(int argc, char** argv) {
         }
         std::cout << std::endl;
     }
-    solve(cnf);
+    dpll_recursive(cnf);
     return 0;
 }
 

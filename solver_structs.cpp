@@ -27,3 +27,11 @@ Assignments from_dimacs_list(const std::vector<int>& assignment_list) {
     }
     return assignments;
 }
+
+std::ostream &operator<<(std::ostream &os, const Assignments &output) {
+    for (auto assingment: output) {
+        os << assingment << " ";
+    }
+    os << std::endl;
+    return os;
+}

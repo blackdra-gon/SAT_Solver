@@ -9,13 +9,13 @@
 #include "dpll.h"
 #include "encoding_util.h"
 
-auto find_unit_clause(const Cnf& cnf) {
+auto find_unit_clause(const Cnf &cnf) {
     return std::find_if(cnf.clauses.begin(),
-                       cnf.clauses.end(),
-                       [](const Clause& c) { return c.size() == 1; });
+                        cnf.clauses.end(),
+                        [](const Clause &c) { return c.size() == 1; });
 }
 
-bool apply_unit_propagation(Cnf& cnf) {
+bool apply_unit_propagation(Cnf &cnf) {
     auto unit_clause_it = find_unit_clause(cnf);
     while (unit_clause_it != cnf.clauses.end()) {
         // Assign the value obtained by the unit clause
@@ -31,13 +31,67 @@ bool apply_unit_propagation(Cnf& cnf) {
         LOG(INFO) << "Removed " << erased_clauses << " clauses, because they are satisfied now";
         // delete the false literal from all clauses
         for (Clause &clause: cnf.clauses) {
-            std::erase(clause, negate_literal(unit_clause_variable));
-            LOG(INFO) << "Removed " << negate_literal(unit_clause_variable) << " from a clause";
+            if (std::erase(clause, negate_literal(unit_clause_variable)) > 0) {
+                LOG(INFO) << "Removed " << dimacs_format(negate_literal(unit_clause_variable)) << " from a clause";
+            }
             if (clause.empty()) {
                 LOG(INFO) << "Conflict! Empty Clause";
+                return false;
             }
         }
         // Find next unitclause
         unit_clause_it = find_unit_clause(cnf);
     }
+    return true;
+}
+
+uint32_t choose_next_variable(Cnf &cnf) {
+    for (int i = 1; i <= cnf.number_of_variables; ++i) {
+        if (std::ranges::find_if(cnf.assignments, [i](const Assignment a) {
+            return a.variable_index_value == internal_representation(i)
+                   || a.variable_index_value == internal_representation(-i);
+        }) == cnf.assignments.end()) {
+            return internal_representation(i);
+        }
+    }
+    LOG(INFO) << "All variables are already assigned";
+    return 0;
+}
+
+bool dpll_recursive(Cnf &cnf) {
+    if (!apply_unit_propagation(cnf)) {
+        LOG(INFO) << "UNSAT";
+        return false;
+    }
+    if (cnf.clauses.empty()) {
+        LOG(INFO) << cnf.assignments;
+        return true;
+    }
+    uint32_t next_variable_for_branching = choose_next_variable(cnf);
+    LOG(INFO) << "Decision variable: " << dimacs_format(next_variable_for_branching);
+    Cnf branch(cnf);
+    branch.clauses.push_back({next_variable_for_branching});
+    // The assignment will be added in the unit propagation step
+    // branch.assignments.emplace_back(next_variable_for_branching);
+    if (dpll_recursive(branch)) {
+        LOG(INFO) << branch.assignments;
+        return true;
+    } else {
+        // Pop assignments until branching variables appears
+        while (branch.assignments.back().variable_index_value != next_variable_for_branching) {
+            branch.assignments.pop_back();
+        }
+        branch.assignments.pop_back();
+        branch.clauses.pop_back();
+        branch.clauses.push_back({negate_literal(next_variable_for_branching)});
+        LOG(INFO) << "Backtracking: Instead of " << dimacs_format(next_variable_for_branching) << "choose" << dimacs_format(
+                negate_literal(next_variable_for_branching));
+        if (dpll_recursive(branch)) {
+            LOG(INFO) << branch.assignments;
+            return true;
+        }
+
+    }
+    LOG(INFO) << "UNSAT";
+    return false;
 }
