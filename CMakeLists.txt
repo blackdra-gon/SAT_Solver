@@ -11,7 +11,7 @@ include_directories("/home/benjamin/Documents/Programmieren/lorina/include")
 
 
 
-add_executable(SAT_Solver main.cpp io_utils.cpp easylogging++.cc dpll.cpp encoding_util.cpp solver_structs.cpp)
+add_executable(SAT_Solver main.cpp io_utils.cpp dpll.cpp encoding_util.cpp solver_structs.cpp)
 
 add_subdirectory(test)
 

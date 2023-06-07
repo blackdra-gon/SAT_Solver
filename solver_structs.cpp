@@ -32,6 +32,5 @@ std::ostream &operator<<(std::ostream &os, const Assignments &output) {
     for (auto assingment: output) {
         os << assingment << " ";
     }
-    os << std::endl;
     return os;
 }

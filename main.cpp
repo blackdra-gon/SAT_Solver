@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "lorina/dimacs.hpp"
-#include "easylogging++.h"
 
 #include "io_utils.h"
 #include "solver_structs.h"
@@ -46,7 +45,6 @@ void solve(Cnf &cnf) {
     std::cout << "UNSAT" << std::endl;
 }
 
-INITIALIZE_EASYLOGGINGPP
 
 int main(int argc, char** argv) {
     Cnf cnf;
@@ -56,7 +54,7 @@ int main(int argc, char** argv) {
         try {
             cnf = import_from_file(input_file);
         } catch (std::exception &e) {
-            LOG(FATAL) << e.what();
+            std::cerr << e.what();
             return 1;
         }
 
@@ -64,7 +62,7 @@ int main(int argc, char** argv) {
     } else {
         auto parse_cnf_result = lorina::read_dimacs(std::cin, Reader(cnf));
         if (parse_cnf_result == lorina::return_code::parse_error) {
-            LOG(FATAL) << "Lorina parse error, when trying to parse from stdin" << std::endl;
+            std::cerr << "Lorina parse error, when trying to parse from stdin" << std::endl;
             return 1;
         }
 

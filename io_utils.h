@@ -10,7 +10,6 @@
 #include <bitset>
 
 #include "lorina/dimacs.hpp"
-#include "easylogging++.h"
 
 #include "solver_structs.h"
 #include "encoding_util.h"
@@ -25,7 +24,7 @@ public:
 
     void on_format(const std::string &format) const override
     {
-        LOG(INFO) << format << std::endl;
+        std::cout << format << std::endl;
     };
 
     void on_number_of_clauses(uint64_t number_of_clauses) const override

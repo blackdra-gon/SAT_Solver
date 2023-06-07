@@ -3,8 +3,7 @@
 //
 #include <algorithm>
 #include <vector>
-
-#include "easylogging++.h"
+#include <iostream>
 
 #include "dpll.h"
 #include "encoding_util.h"
@@ -22,20 +21,20 @@ bool apply_unit_propagation(Cnf &cnf) {
         uint64_t unit_clause_variable = unit_clause_it->at(0);
         Assignment new_assignment(unit_clause_variable);
         cnf.assignments.push_back(new_assignment);
-        LOG(INFO) << "Assigned implied variable " << dimacs_format(unit_clause_variable);
+        std::cout << "Assigned implied variable " << dimacs_format(unit_clause_variable) << std::endl;
         // For all clauses: delete all clause which have a true literal now
         auto erased_clauses = std::erase_if(cnf.clauses, [unit_clause_variable](const Clause &clause) {
                                                 return std::ranges::find(clause, unit_clause_variable) != clause.end();
                                             }
         );
-        LOG(INFO) << "Removed " << erased_clauses << " clauses, because they are satisfied now";
+        std::cout << "Removed " << erased_clauses << " clauses, because they are satisfied now" << std::endl;
         // delete the false literal from all clauses
         for (Clause &clause: cnf.clauses) {
             if (std::erase(clause, negate_literal(unit_clause_variable)) > 0) {
-                LOG(INFO) << "Removed " << dimacs_format(negate_literal(unit_clause_variable)) << " from a clause";
+                std::cout << "Removed " << dimacs_format(negate_literal(unit_clause_variable)) << " from a clause" << std::endl;
             }
             if (clause.empty()) {
-                LOG(INFO) << "Conflict! Empty Clause";
+                std::cout << "Conflict! Empty Clause" << std::endl;
                 return false;
             }
         }
@@ -54,27 +53,27 @@ uint32_t choose_next_variable(Cnf &cnf) {
             return internal_representation(i);
         }
     }
-    LOG(INFO) << "All variables are already assigned";
+    std::cout << "All variables are already assigned" << std::endl;
     return 0;
 }
 
 bool dpll_recursive(Cnf &cnf) {
     if (!apply_unit_propagation(cnf)) {
-        LOG(INFO) << "UNSAT";
+        std::cout << "UNSAT" << std::endl;
         return false;
     }
     if (cnf.clauses.empty()) {
-        LOG(INFO) << cnf.assignments;
+        std::cout << cnf.assignments << std::endl;
         return true;
     }
     uint32_t next_variable_for_branching = choose_next_variable(cnf);
-    LOG(INFO) << "Decision variable: " << dimacs_format(next_variable_for_branching);
+    std::cout << "Decision variable: " << dimacs_format(next_variable_for_branching) << std::endl;
     Cnf branch(cnf);
     branch.clauses.push_back({next_variable_for_branching});
     // The assignment will be added in the unit propagation step
     // branch.assignments.emplace_back(next_variable_for_branching);
     if (dpll_recursive(branch)) {
-        LOG(INFO) << branch.assignments;
+        std::cout << branch.assignments  << std::endl;
         return true;
     } else {
         // Pop assignments until branching variables appears
@@ -84,14 +83,14 @@ bool dpll_recursive(Cnf &cnf) {
         branch.assignments.pop_back();
         branch.clauses.pop_back();
         branch.clauses.push_back({negate_literal(next_variable_for_branching)});
-        LOG(INFO) << "Backtracking: Instead of " << dimacs_format(next_variable_for_branching) << "choose" << dimacs_format(
-                negate_literal(next_variable_for_branching));
+        std::cout << "Backtracking: Instead of " << dimacs_format(next_variable_for_branching) << "choose" << dimacs_format(
+                negate_literal(next_variable_for_branching))  << std::endl;
         if (dpll_recursive(branch)) {
-            LOG(INFO) << branch.assignments;
+            std::cout << branch.assignments  << std::endl;
             return true;
         }
 
     }
-    LOG(INFO) << "UNSAT";
+    std::cout << "UNSAT"  << std::endl;
     return false;
 }
