@@ -9,7 +9,7 @@
 #include <vector>
 #include <bitset>
 
-#include "lorina/dimacs.hpp"
+#include "lorina_include/lorina/dimacs.hpp"
 
 #include "solver_structs.h"
 #include "encoding_util.h"

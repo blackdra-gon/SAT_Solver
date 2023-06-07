@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "lorina/dimacs.hpp"
+#include "lorina_include/lorina/dimacs.hpp"
 
 #include "io_utils.h"
 #include "solver_structs.h"
