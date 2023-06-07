@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "lorina/dimacs.hpp"
-#include <cxxopts.hpp>
 #include "easylogging++.h"
 
 #include "io_utils.h"
@@ -52,13 +51,8 @@ INITIALIZE_EASYLOGGINGPP
 int main(int argc, char** argv) {
     Cnf cnf;
     // Read the file given as first positional argument, use stdin if no argument given
-    cxxopts::Options options("SAT_Solver", "A sat-solver programmed for a TCS Seminar by Benjamin Hennies ");
-    options.add_options()
-            ("file", "file containing a cnf formula in dimacs format", cxxopts::value<std::string>());
-    options.parse_positional("file");
-    auto result = options.parse(argc, argv);
-    if ( result.count("file") ) {
-        std::string input_file = result["file"].as<std::string>();
+    if ( argc > 1 ) {
+        std::string input_file = argv[1];
         try {
             cnf = import_from_file(input_file);
         } catch (std::exception &e) {

@@ -6,14 +6,7 @@
     "name" : "catch2",
     "version>=" : "3.3.2"
   }, {
-    "name" : "cxxopts",
-    "version>=" : "3.1.1",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(cxxopts CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE cxxopts::cxxopts)\n"
-  }, {
     "name" : "easyloggingpp",
     "version>=" : "9.97.0#2"
-  }, {
-    "name" : "fmt",
-    "version>=" : "9.1.0#1"
   } ]
 }
