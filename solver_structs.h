@@ -12,7 +12,15 @@
 using Variable_t = uint32_t;
 using ClauseIndex_t = uint32_t;
 
-using Clause = std::vector<Variable_t>;
+struct Literal_t {
+    Variable_t literal;
+};
+
+enum lbool: uint8_t {
+    TRUE, FALSE, UNASSIGNED
+};
+
+//using Clause = std::vector<Variable_t>;
 
 struct Assignment {
     Variable_t variable_index_value;
@@ -48,7 +56,7 @@ std::ostream& operator<<(std::ostream& os, const Assignments& output);
 
 Assignments from_dimacs_list(const std::vector<int>& assignment_list);
 
-struct Cnf {
+/*struct Cnf {
     std::vector<Clause> clauses;
     int number_of_variables;
     Assignments assignments;
@@ -57,9 +65,9 @@ struct Cnf {
         return clauses == rhs.clauses;
     }
 
-};
+};*/
 
-std::ostream& operator<<(std::ostream& os, const Cnf& output);
+//std::ostream& operator<<(std::ostream& os, const Cnf& output);
 
 
 
