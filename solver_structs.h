@@ -12,9 +12,7 @@
 using Variable_t = uint32_t;
 using ClauseIndex_t = uint32_t;
 
-struct Literal_t {
-    Variable_t literal;
-};
+using Literal_t = uint32_t;
 
 enum lbool: uint8_t {
     TRUE, FALSE, UNASSIGNED

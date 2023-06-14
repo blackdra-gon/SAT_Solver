@@ -6,10 +6,15 @@
 #define SAT_SOLVER_ENCODING_UTIL_H
 
 #include "solver_structs.h"
+#include "clause.h"
 
-Variable_t negate_literal(Variable_t literal);
+Literal_t negate_literal(Variable_t literal);
 
-Variable_t internal_representation(int input);
+Literal_t internal_representation(int input);
+
+Clause internal_representation(const std::vector<int>& input);
+
+std::vector<Clause> internal_representation(const std::vector<std::vector<int>>& input);
 
 int dimacs_format(Variable_t internal_variable);
 

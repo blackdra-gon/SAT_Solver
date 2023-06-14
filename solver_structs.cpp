@@ -5,7 +5,7 @@
 #include "solver_structs.h"
 #include "encoding_util.h"
 
-std::ostream& operator<<(std::ostream& os, const Cnf& cnf) {
+/*std::ostream& operator<<(std::ostream& os, const Cnf& cnf) {
     for (const auto& clause : cnf.clauses) {
         for (auto literal : clause) {
             os << dimacs_format(literal) << " ";
@@ -13,7 +13,7 @@ std::ostream& operator<<(std::ostream& os, const Cnf& cnf) {
         os << std::endl;
     }
     return os;
-}
+}*/
 
 std::ostream& operator<<(std::ostream& os, const Assignment& output) {
     os << dimacs_format(output.variable_index_value);

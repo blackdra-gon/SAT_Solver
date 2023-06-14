@@ -8,7 +8,7 @@
 #include "dpll.h"
 #include "encoding_util.h"
 
-auto find_unit_clause(const Cnf &cnf) {
+/*auto find_unit_clause(const Cnf &cnf) {
     return std::find_if(cnf.clauses.begin(),
                         cnf.clauses.end(),
                         [](const Clause &c) { return c.size() == 1; });
@@ -93,4 +93,4 @@ bool dpll_recursive(Cnf &cnf) {
     }
     std::cout << "UNSAT"  << std::endl;
     return false;
-}
+}*/
