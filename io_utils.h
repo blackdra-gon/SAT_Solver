@@ -35,7 +35,7 @@ public:
 
     void on_number_of_variables(uint64_t number_of_variables) const override
     {
-
+        solver.setNumberOfVariables(number_of_variables);
     }
     void on_clause(const std::vector<int> &clause_input) const override
     {

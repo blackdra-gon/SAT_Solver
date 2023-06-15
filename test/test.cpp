@@ -17,7 +17,19 @@ TEST_CASE("Input") {
                                                       {-1, -3, -5}, {4, 6, 8},
                                                       {1, 5, -7}};
     std::vector<Clause> expected_clauses_internal = internal_representation(expected_clauses);
+    //s.antecedent_clauses.emplace_back(s.clauses[0]);
     CHECK(s.clauses == expected_clauses_internal);
+    CHECK(s.watch_lists.size() == 20);
+    CHECK(s.assignments.size() == 10);
+}
+
+TEST_CASE("Propagation in one clause") {
+    Solver s;
+    //s.addClause()
+}
+
+TEST_CASE("Solver enqueue") {
+
 }
 
 TEST_CASE("Input/Output in dimacs format") {

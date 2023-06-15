@@ -7,7 +7,9 @@
 
 #include <vector>
 #include <queue>
+#include "solver_structs.h"
 #include "clause.h"
+
 
 class Solver {
 public:
@@ -15,13 +17,17 @@ public:
 
     std::vector<Clause> clauses;
     std::queue<Literal_t> propagation_queue;
-private:
-    std::vector<lbool> assignments;
+    std::vector<std::vector<std::reference_wrapper<Clause>>> watch_lists; // literal indexed
+    std::vector<lbool> assignments; // variable indexed
     std::vector<Literal_t> trail;
     std::vector<int> decision_levels;
-    std::vector<Clause*> antecedent_clauses;
+    std::vector<std::reference_wrapper<Clause>> antecedent_clauses;
+
+    lbool value(Literal_t);
 public:
     void addClause(const Clause&);
+    void setNumberOfVariables(int number);
+    bool enqueue(Literal_t l, Clause& reason);
 };
 
 #endif //SAT_SOLVER_SOLVER_H
