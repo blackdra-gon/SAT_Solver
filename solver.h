@@ -34,6 +34,11 @@ public:
     lbool value(Literal_t);
 public:
     void addClause(const Clause&);
+    /**
+     *
+     * @param clauses in dimacs representation
+     */
+    void addClauses(std::vector<std::vector<int>> clauses);
     void setNumberOfVariables(int number);
     /**
      * Add a unit constraint to the propagation queue and also add the respective assignment
@@ -42,6 +47,11 @@ public:
      * @return true on succes, false if a conflict was detected
      */
     bool enqueue(Literal_t literal, std::optional<std::reference_wrapper<Clause>> reason=std::nullopt);
+    /**
+     * Propagates all entries of the propagation queue to all clauses on the watchlist of the respective literal.
+     * In case of a conflict, returns the learnt clause.
+     */
+    void propagate();
 };
 
 #endif //SAT_SOLVER_SOLVER_H

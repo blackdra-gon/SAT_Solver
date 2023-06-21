@@ -66,3 +66,17 @@ void Solver::setNumberOfVariables(int number) {
     }
 
 }
+
+void Solver::propagate() {
+    while (!propagation_queue.empty()) {
+        Literal_t literal = propagation_queue.front();
+        propagation_queue.pop();
+
+    }
+}
+
+void Solver::addClauses(std::vector<std::vector<int>> clauses) {
+    for (auto literal_list: clauses) {
+        addClause(internal_representation(literal_list));
+    }
+}

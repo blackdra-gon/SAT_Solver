@@ -4,9 +4,7 @@
 
 
 #include "../io_utils.h"
-#include "../dpll.h"
-#include "../encoding_util.h"
-#include "../solver_structs.h"
+#include "test_util.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -28,13 +26,28 @@ TEST_CASE("Input") {
     CHECK(s.watch_lists[internal_representation(2)].front() == s.clauses[0]);
 }
 
+TEST_CASE("Solver propagation routine") {
+    Solver s;
+    s.setNumberOfVariables(3);
+    s.addClauses({{1,-2,3}, {-1,-3,-2}, {1}});
+    s.propagate();
+    check_assignments(s, {TRUE, UNASSIGNED, UNASSIGNED});
+    check_clauses(s, {{1,-2,3}, {-3,-2,-1}});
+    check_watchlists(s, {{}, {0}, {0,1}, {}, {1}, {}});
+    Solver s1;
+    s.setNumberOfVariables(3);
+    s.addClauses({{1,-2,3}, {-1,-3,-2}, {1}, {-1,2}});
+    s.propagate();
+    check_assignments(s1, {TRUE, UNASSIGNED, UNASSIGNED});
+    check_clauses(s1, {{1,-2,3}, {-3,-2,-1}, {2,-1}});
+    check_watchlists(s1, {{2}, {0}, {0,1}, {2}, {1}, {}});
+}
+
 TEST_CASE("Propagation in one clause") {
     Solver s;
     s.setNumberOfVariables(3);
     s.addClause(internal_representation({1,-2,3}));
-    CHECK(s.watch_lists[internal_representation(2)].front() == s.clauses[0]);
-    CHECK(s.watch_lists[internal_representation(-1)].front() == s.clauses[0]);
-    CHECK(s.watch_lists[internal_representation(-3)].empty());
+    check_watchlists(s, {{},{0},{0},{},{},{}});
     s.clauses[0].propagate(s, internal_representation(2));
     s.assignments[1] = TRUE;
     // this has to be checked for the general propagation function
