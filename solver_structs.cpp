@@ -34,3 +34,25 @@ std::ostream &operator<<(std::ostream &os, const Assignments &output) {
     }
     return os;
 }
+
+Variable_t var_index(Literal_t l) {
+    return l >> 1;
+}
+
+/**
+ *
+ * @param l
+ * @return true, if literal is positive, false if it has a negation
+ */
+bool sign(Literal_t l) {
+    return !(l % 2);
+}
+
+lbool lsign(Literal_t l) {
+    return sign(l) ? TRUE : FALSE;
+}
+
+lbool operator!(lbool b) {
+    return b == TRUE ? FALSE : b == FALSE ? TRUE : UNASSIGNED;
+}
+

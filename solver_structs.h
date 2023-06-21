@@ -9,14 +9,25 @@
 #include <cstdint>
 #include <ostream>
 
+#define DECISION_LEVEL_UNASSIGNED (-2)
+
 using Variable_t = uint32_t;
 using ClauseIndex_t = uint32_t;
 
 using Literal_t = uint32_t;
 
+Variable_t var_index(Literal_t);
+bool sign(Literal_t);
+
+
+
 enum lbool: uint8_t {
     TRUE, FALSE, UNASSIGNED
 };
+
+lbool operator!(lbool b);
+
+lbool lsign(Literal_t);
 
 //using Clause = std::vector<Variable_t>;
 

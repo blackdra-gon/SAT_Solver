@@ -8,6 +8,8 @@
 #include <vector>
 #include "solver_structs.h"
 
+class Solver;
+
 
 class Clause {
 public:
@@ -17,11 +19,13 @@ public:
     /**
      * This function is used to propagate the effects of the assignment l to this clause.
      * This clause is in the watchlist of l, which means that it contains the literal not-l as a watched literal (Index 0 or 1).
+     * The watchlist of l was moved to a temporary vector before, so this clause is not in the watchlist of l (but may
+     * be reinserted during this function.
      * @param s
      * @param l
      * @return false, if conflict occurs. true on succes
      */
-    //bool propagate(const Solver& s, Literal_t l);
+    bool propagate(Solver& s, Literal_t l);
 };
 
 std::ostream& operator<<(std::ostream& os, const Clause& output);

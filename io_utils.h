@@ -23,10 +23,7 @@ private:
 public:
     explicit Reader(Solver &solver) : solver(solver) {}
 
-    void on_format(const std::string &format) const override
-    {
-        std::cout << format << std::endl;
-    };
+    void on_format(const std::string &format) const override {};
 
     void on_number_of_clauses(uint64_t number_of_clauses) const override
     {
@@ -36,6 +33,8 @@ public:
     void on_number_of_variables(uint64_t number_of_variables) const override
     {
         solver.setNumberOfVariables(number_of_variables);
+        solver.clauses.reserve(number_of_variables);
+        // reserve also the other vectors?
     }
     void on_clause(const std::vector<int> &clause_input) const override
     {
