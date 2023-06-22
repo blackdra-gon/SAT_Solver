@@ -35,10 +35,10 @@ TEST_CASE("Solver propagation routine") {
     check_clauses(s, {{1,-2,3}, {-3,-2,-1}});
     check_watchlists(s, {{}, {0}, {0,1}, {}, {1}, {}});
     Solver s1;
-    s.setNumberOfVariables(3);
-    s.addClauses({{1,-2,3}, {-1,-3,-2}, {1}, {-1,2}});
-    s.propagate();
-    check_assignments(s1, {TRUE, UNASSIGNED, UNASSIGNED});
+    s1.setNumberOfVariables(3);
+    s1.addClauses({{1,-2,3}, {-1,-3,-2}, {1}, {-1,2}});
+    s1.propagate();
+    check_assignments(s1, {TRUE, TRUE, FALSE});
     check_clauses(s1, {{1,-2,3}, {-3,-2,-1}, {2,-1}});
     check_watchlists(s1, {{2}, {0}, {0,1}, {2}, {1}, {}});
 }

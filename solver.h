@@ -49,7 +49,7 @@ public:
     bool enqueue(Literal_t literal, std::optional<std::reference_wrapper<Clause>> reason=std::nullopt);
     /**
      * Propagates all entries of the propagation queue to all clauses on the watchlist of the respective literal.
-     * In case of a conflict, returns the learnt clause.
+     * In case of a conflict, returns the clause which causes the conflict.
      */
     void propagate();
 };

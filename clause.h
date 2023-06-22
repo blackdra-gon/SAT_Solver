@@ -26,8 +26,10 @@ public:
      * @return false, if conflict occurs. true on succes
      */
     bool propagate(Solver& s, Literal_t l);
+
+    friend std::ostream& operator<<(std::ostream& os, const Clause& output);
 };
 
-std::ostream& operator<<(std::ostream& os, const Clause& output);
+
 
 #endif //SAT_SOLVER_CLAUSE_H

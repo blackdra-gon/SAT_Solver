@@ -27,13 +27,13 @@ public:
 
     void on_number_of_clauses(uint64_t number_of_clauses) const override
     {
-
+        solver.clauses.reserve(number_of_clauses);
     }
 
     void on_number_of_variables(uint64_t number_of_variables) const override
     {
         solver.setNumberOfVariables(number_of_variables);
-        solver.clauses.reserve(number_of_variables);
+
         // reserve also the other vectors?
     }
     void on_clause(const std::vector<int> &clause_input) const override
