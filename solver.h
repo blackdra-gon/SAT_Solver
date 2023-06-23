@@ -51,7 +51,7 @@ public:
      * Propagates all entries of the propagation queue to all clauses on the watchlist of the respective literal.
      * In case of a conflict, returns the clause which causes the conflict.
      */
-    void propagate();
+    std::optional<std::reference_wrapper<Clause>> propagate();
 };
 
 #endif //SAT_SOLVER_SOLVER_H

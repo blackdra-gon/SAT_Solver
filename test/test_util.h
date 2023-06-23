@@ -28,6 +28,14 @@ void check_watchlists(Solver &s, const std::vector<std::vector<int>>& expected_c
     }
 }
 
-void check_clauses(Solver &s, std::vector<std::vector<int>> expected_clauses) {
+void check_clauses(Solver &s, const std::vector<std::vector<int>>& expected_clauses) {
     CHECK(s.clauses == internal_representation(expected_clauses));
+}
+
+void check_trail(Solver &s, std::vector<int> expected_assignments) {
+    std::vector<Literal_t> expected_trail;
+    for (auto x: expected_assignments) {
+        expected_trail.push_back(internal_representation(x));
+    }
+    CHECK(s.trail == expected_trail);
 }

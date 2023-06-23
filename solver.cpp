@@ -71,7 +71,7 @@ void Solver::setNumberOfVariables(int number) {
 
 }
 
-void Solver::propagate() {
+std::optional<std::reference_wrapper<Clause>> Solver::propagate() {
     while (!propagation_queue.empty()) {
         Literal_t literal = propagation_queue.front();
         propagation_queue.pop();
@@ -79,11 +79,19 @@ void Solver::propagate() {
         tmp_watchlist = watch_lists[literal];
         watch_lists[literal].clear();
         //std::move(watch_lists[literal].begin(), watch_lists[literal].end(), tmp_watchlist.begin());
-        for (auto watched_clause: tmp_watchlist) {
-            watched_clause.get().propagate(*this, literal);
+        for (int i = 0; i < tmp_watchlist.size(); ++i) {
+            if(!tmp_watchlist[i].get().propagate(*this, literal)) {
+                // Conflict occurred
+                // reinsert remaining entries from tmp_watchlist
+                for (int j = i + 1; j < tmp_watchlist.size(); ++j) {
+                    watch_lists[literal].push_back(tmp_watchlist[j]);
+                }
+                return tmp_watchlist[i];
+            }
         }
 
     }
+    return std::nullopt;
 }
 /**
  * Should only be called once for every solver object, otherwise not enough space is reserved

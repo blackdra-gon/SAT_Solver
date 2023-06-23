@@ -30,17 +30,19 @@ TEST_CASE("Solver propagation routine") {
     Solver s;
     s.setNumberOfVariables(3);
     s.addClauses({{1,-2,3}, {-1,-3,-2}, {1}});
-    s.propagate();
+    CHECK(s.propagate() == std::nullopt);
     check_assignments(s, {TRUE, UNASSIGNED, UNASSIGNED});
     check_clauses(s, {{1,-2,3}, {-3,-2,-1}});
     check_watchlists(s, {{}, {0}, {0,1}, {}, {1}, {}});
+    check_trail(s, {1});
     Solver s1;
     s1.setNumberOfVariables(3);
     s1.addClauses({{1,-2,3}, {-1,-3,-2}, {1}, {-1,2}});
-    s1.propagate();
+    CHECK(s1.propagate() == std::nullopt);
     check_assignments(s1, {TRUE, TRUE, FALSE});
     check_clauses(s1, {{1,-2,3}, {-3,-2,-1}, {2,-1}});
     check_watchlists(s1, {{2}, {0}, {0,1}, {2}, {1}, {}});
+    check_trail(s1, {1,2,-3});
 }
 
 TEST_CASE("Propagation in one clause") {
@@ -58,12 +60,23 @@ TEST_CASE("Propagation in one clause") {
     CHECK(s.watch_lists[internal_representation(-3)].front() == s.clauses[0]);
     CHECK(s.watch_lists[internal_representation(-1)].front() == s.clauses[0]);
     CHECK(s.propagation_queue.front() == internal_representation(3));
+}
+
+TEST_CASE("Unit propagation conflict") {
+    Solver s;
+    s.setNumberOfVariables(2);
+    s.addClauses({{1,-2}, {1,2}, {-1}});
+    check_watchlists(s, {{}, {0,1}, {1}, {0}});
+    //CHECK(s.propagate() != std::nullopt);
+    CHECK(s.propagate() == s.clauses[1]);
+    check_watchlists(s, {{}, {0,1}, {1}, {0}});
+}
+
+TEST_CASE("Clause Learning") {
 
 }
 
-TEST_CASE("Solver enqueue") {
 
-}
 
 TEST_CASE("Input/Output in dimacs format") {
     std::vector<bool> assignment = {0,1,0,1};
