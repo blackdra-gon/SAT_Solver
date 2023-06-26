@@ -97,9 +97,18 @@ std::optional<std::reference_wrapper<Clause>> Solver::propagate() {
  * Should only be called once for every solver object, otherwise not enough space is reserved
  * @param clauses
  */
-void Solver::addClauses(std::vector<std::vector<int>> input_clauses) {
+void Solver::addClauses(const std::vector<std::vector<int>>& input_clauses) {
     clauses.reserve(input_clauses.size());
-    for (auto literal_list: input_clauses) {
+    for (const auto& literal_list: input_clauses) {
         addClause(internal_representation(literal_list));
     }
+}
+
+int Solver::decision_level() const {
+    return trail_limits.size();
+}
+
+bool Solver::assume(Literal_t literal) {
+    trail_limits.push_back(trail.size());
+    return enqueue(literal);
 }

@@ -27,6 +27,10 @@ public:
     // Assignments
     std::vector<lbool> assignments; // variable indexed
     std::vector<Literal_t> trail;
+    /**
+     * trail_limits[i] contains the number of entries the trail had, before the assume of decision_level i + 1 was
+     * conducted.
+     */
     std::vector<int> trail_limits;
     std::vector<std::optional<std::reference_wrapper<Clause>>> antecedent_clauses; // variable indexed
     std::vector<int> decision_levels; // variable indexed
@@ -38,7 +42,7 @@ public:
      *
      * @param clauses in dimacs representation
      */
-    void addClauses(std::vector<std::vector<int>> clauses);
+    void addClauses(const std::vector<std::vector<int>>& clauses);
     void setNumberOfVariables(int number);
     /**
      * Add a unit constraint to the propagation queue and also add the respective assignment
@@ -52,6 +56,10 @@ public:
      * In case of a conflict, returns the clause which causes the conflict.
      */
     std::optional<std::reference_wrapper<Clause>> propagate();
+
+    int decision_level() const;
+
+    bool assume(Literal_t literal);
 };
 
 #endif //SAT_SOLVER_SOLVER_H

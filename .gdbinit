@@ -1,0 +1,1 @@
+source /home/benjamin/CLionProjects/SAT_Solver/pretty_printer/pretty_print.py

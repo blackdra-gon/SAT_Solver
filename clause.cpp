@@ -39,9 +39,9 @@ std::ostream &operator<<(std::ostream &os, const Clause &output) {
     os << "{";
     for (auto l: output.literals) {
         if (l == output.literals.back()) {
-            os << l;
+            os << dimacs_format(l);
         } else {
-            os << l << ", ";
+            os << dimacs_format(l) << ", ";
         }
     }
     os << "}";
