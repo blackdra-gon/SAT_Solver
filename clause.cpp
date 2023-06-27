@@ -5,6 +5,7 @@
 #include "clause.h"
 #include "solver.h"
 #include "encoding_util.h"
+#include "clauseRef.h"
 
 bool Clause::operator==(const Clause &other) const{
     return literals == other.literals;
@@ -46,4 +47,8 @@ std::ostream &operator<<(std::ostream &os, const Clause &output) {
     }
     os << "}";
     return os;
+}
+
+bool Clause::operator==(const ClauseRef &other) const {
+    return *this == other.get();
 }

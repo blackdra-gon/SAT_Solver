@@ -17,8 +17,8 @@ void Solver::addClause(const Clause& clause) {
     } else {
         clauses.push_back(clause);
         // Add clause to the watchlist of the negation of the two first elements
-        watch_lists[negate_literal(clause.literals[0])].push_back(std::ref(clauses.back()));
-        watch_lists[negate_literal(clause.literals[1])].push_back(std::ref(clauses.back()));
+        watch_lists[negate_literal(clause.literals[0])].emplace_back(std::ref(clauses.back()));
+        watch_lists[negate_literal(clause.literals[1])].emplace_back(std::ref(clauses.back()));
     }
 }
 
@@ -71,11 +71,11 @@ void Solver::setNumberOfVariables(int number) {
 
 }
 
-std::optional<std::reference_wrapper<Clause>> Solver::propagate() {
+std::optional<ClauseRef> Solver::propagate() {
     while (!propagation_queue.empty()) {
         Literal_t literal = propagation_queue.front();
         propagation_queue.pop();
-        std::vector<std::reference_wrapper<Clause>> tmp_watchlist;
+        std::vector<ClauseRef> tmp_watchlist;
         tmp_watchlist = watch_lists[literal];
         watch_lists[literal].clear();
         //std::move(watch_lists[literal].begin(), watch_lists[literal].end(), tmp_watchlist.begin());

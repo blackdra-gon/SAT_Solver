@@ -8,6 +8,7 @@
 #include <vector>
 #include "solver_structs.h"
 
+class ClauseRef;
 class Solver;
 
 
@@ -16,6 +17,7 @@ public:
     std::vector<Literal_t> literals;
 
     bool operator==(const Clause& other) const;
+    bool operator==(const ClauseRef& other) const;
     /**
      * This function is used to propagate the effects of the assignment l to this clause.
      * This clause is in the watchlist of l, which means that it contains the literal not-l as a watched literal (Index 0 or 1).

@@ -11,6 +11,7 @@
 #include <functional>
 #include "solver_structs.h"
 #include "clause.h"
+#include "clauseRef.h"
 
 using Watchlists = std::vector<std::vector<std::reference_wrapper<Clause>>>;
 
@@ -21,7 +22,7 @@ public:
 
     std::vector<Clause> clauses;
     std::queue<Literal_t> propagation_queue;
-    std::vector<std::vector<std::reference_wrapper<Clause>>> watch_lists; // literal indexed
+    std::vector<std::vector<ClauseRef>> watch_lists; // literal indexed
 
 
 
@@ -57,7 +58,7 @@ public:
      * Propagates all entries of the propagation queue to all clauses on the watchlist of the respective literal.
      * In case of a conflict, returns the clause which causes the conflict.
      */
-    std::optional<std::reference_wrapper<Clause>> propagate();
+    std::optional<ClauseRef> propagate();
 
     int decision_level() const;
 

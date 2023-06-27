@@ -13,7 +13,8 @@ class ClauseRef {
 
 public:
     ClauseRef(std::reference_wrapper<Clause>);
-    Clause get();
-}
+    Clause& get() const;
+    bool operator==(const Clause& other) const;
+};
 
 #endif //SAT_SOLVER_CLAUSEREF_H
