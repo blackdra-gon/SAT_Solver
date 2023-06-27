@@ -12,6 +12,8 @@
 #include "solver_structs.h"
 #include "clause.h"
 
+using Watchlists = std::vector<std::vector<std::reference_wrapper<Clause>>>;
+
 
 class Solver {
 public:

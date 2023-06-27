@@ -29,6 +29,7 @@ lbool operator!(lbool b);
 
 lbool lsign(Literal_t);
 
+
 //using Clause = std::vector<Variable_t>;
 
 struct Assignment {

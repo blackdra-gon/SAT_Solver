@@ -9,7 +9,9 @@ def dimacs_format(internal_representation):
         output *= -1
     output //= 2
     return str(output)
-class ClausePrinter():
+
+
+class ClausePrinter:
 
     def __init__(self, val):
         self.val = val
@@ -35,9 +37,34 @@ class ClausePrinter():
         return '{' + ', '.join(elements) + '}'
 
 
+class WatchlistsPrinter:
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return 123
+
+
+class ClauseRefPrinter:
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return self.val['_M_data']
+
 
 def my_pp_func(val):
-    if str(val.type) == 'Clause': return ClausePrinter(val)
+    if str(val.type) == 'std::vector<std::reference_wrapper<Clause>>':
+        return WatchlistsPrinter(val)
+    if str(val.type) == 'std::vector<std::vector<std::reference_wrapper<Clause>>>':
+        return WatchlistsPrinter(val)
+    if str(val.type) == 'std::reference_wrapper<Clause>':
+        return ClauseRefPrinter(val)
+    if str(val.type) == 'Clause':
+        return ClausePrinter(val)
+
 
 
 gdb.pretty_printers.append(my_pp_func)
