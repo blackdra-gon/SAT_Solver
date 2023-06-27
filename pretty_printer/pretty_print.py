@@ -52,7 +52,7 @@ class ClauseRefPrinter:
         self.val = val
 
     def to_string(self):
-        return self.val['_M_data']
+        return 'Clause[' + str(self.val['index']) + ']'
 
 
 def my_pp_func(val):
@@ -60,7 +60,7 @@ def my_pp_func(val):
         return WatchlistsPrinter(val)
     if str(val.type) == 'std::vector<std::vector<std::reference_wrapper<Clause>>>':
         return WatchlistsPrinter(val)
-    if str(val.type) == 'std::reference_wrapper<Clause>':
+    if str(val.type) == 'ClauseRef':
         return ClauseRefPrinter(val)
     if str(val.type) == 'Clause':
         return ClausePrinter(val)

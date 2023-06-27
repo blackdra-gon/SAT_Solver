@@ -16,6 +16,9 @@ void Solver::addClause(const Clause& clause) {
         enqueue(clause.literals.back());
     } else {
         clauses.push_back(clause);
+        if (clauses.size() == 1) {
+            ClauseRef::setClausesBaseAddress(&clauses[0]);
+        }
         // Add clause to the watchlist of the negation of the two first elements
         watch_lists[negate_literal(clause.literals[0])].emplace_back(std::ref(clauses.back()));
         watch_lists[negate_literal(clause.literals[1])].emplace_back(std::ref(clauses.back()));

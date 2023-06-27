@@ -76,17 +76,12 @@ TEST_CASE("Clause Learning") {
     Solver s;
     s.setNumberOfVariables(8);
     s.addClauses({{-1,-2,3}, {-1,4}, {-3,-4,5}, {-8,-5,6}, {-5,7}, {-6,-7}});
-    for (int i = 0; i < s.clauses.size(); ++i) {
-        std::cout << "address of clause[" << i << "]: " << &s.clauses[i] << std::endl;
-        if (i > 0) {
-            std::cout << "offset to previous clause: " << long(&s.clauses[i]) - long(&s.clauses[i - 1]) << std::endl;
-        }
-    }
-    s.assume(8);
+    std::cout << s.watch_lists[0][0] << std::endl;
+    s.assume(internal_representation(8));
     CHECK(s.propagate() == std::nullopt);
-    s.assume(2);
+    s.assume(internal_representation(2));
     CHECK(s.propagate() == std::nullopt);
-    s.assume(1);
+    s.assume(internal_representation(1));
     CHECK(s.propagate() == s.clauses[5]);
 }
 

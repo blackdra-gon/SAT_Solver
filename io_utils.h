@@ -49,7 +49,7 @@ public:
     }
     void on_end() const override
     {
-
+        ClauseRef::setClausesBaseAddress(&solver.clauses[0]);
     }
 
 
