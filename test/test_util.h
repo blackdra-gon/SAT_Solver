@@ -22,7 +22,7 @@ void check_watchlists(Solver &s, const std::vector<std::vector<int>>& expected_c
             std::cout << "Expected and actual watchlist differ in length";
             CHECK(false);
         }
-        for (int j; j < s.watch_lists[i].size(); ++j) {
+        for (int j = 0; j < s.watch_lists[i].size(); ++j) {
             CHECK(s.watch_lists[i][j] == s.clauses[expected_clauses[i][j]]);
         }
     }
@@ -34,8 +34,25 @@ void check_clauses(Solver &s, const std::vector<std::vector<int>>& expected_clau
 
 void check_trail(Solver &s, std::vector<int> expected_assignments) {
     std::vector<Literal_t> expected_trail;
-    for (auto x: expected_assignments) {
+    expected_trail.reserve(expected_assignments.size());
+for (auto x: expected_assignments) {
         expected_trail.push_back(internal_representation(x));
     }
     CHECK(s.trail == expected_trail);
+}
+
+void check_decision_levels(Solver &s, std::vector<int> expected_levels) {
+    CHECK(s.decision_levels == expected_levels);
+}
+
+void check_antecedent_clauses(Solver &s, std::vector<int> expected_reasons) {
+    CHECK(expected_reasons.size() == s.antecedent_clauses.size());
+    for (int i = 0; i < expected_reasons.size(); ++i) {
+        if (expected_reasons[i] == -1) {
+            CHECK(s.antecedent_clauses[i] == std::nullopt);
+        } else {
+            CHECK(s.antecedent_clauses[i] == s.clauses[expected_reasons[i]]);
+        }
+    }
+    //CHECK(s.antecedent_clauses == expected_reasons);
 }

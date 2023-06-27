@@ -31,11 +31,11 @@ public:
     std::vector<lbool> assignments; // variable indexed
     std::vector<Literal_t> trail;
     /**
-     * trail_limits[i] contains the number of entries the trail had, before the assume of decision_level i + 1 was
+     * trail_limits[i] contains the number of entries the trail had, before the assume of current_decision_level i + 1 was
      * conducted.
      */
     std::vector<int> trail_limits;
-    std::vector<std::optional<std::reference_wrapper<Clause>>> antecedent_clauses; // variable indexed
+    std::vector<std::optional<ClauseRef>> antecedent_clauses; // variable indexed
     std::vector<int> decision_levels; // variable indexed
 
     lbool value(Literal_t);
@@ -60,7 +60,7 @@ public:
      */
     std::optional<ClauseRef> propagate();
 
-    int decision_level() const;
+    int current_decision_level() const;
 
     bool assume(Literal_t literal);
 };

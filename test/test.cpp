@@ -66,23 +66,25 @@ TEST_CASE("Unit propagation conflict") {
     Solver s;
     s.setNumberOfVariables(2);
     s.addClauses({{1,-2}, {1,2}, {-1}});
-    check_watchlists(s, {{}, {0,1}, {1}, {0}});
+    check_watchlists(s, {{}, {0,1}, {0}, {1}});
     //CHECK(s.propagate() != std::nullopt);
     CHECK(s.propagate() == s.clauses[1]);
-    check_watchlists(s, {{}, {0,1}, {1}, {0}});
+    check_watchlists(s, {{}, {0,1}, {0}, {1}});
 }
 
 TEST_CASE("Clause Learning") {
     Solver s;
     s.setNumberOfVariables(8);
     s.addClauses({{-1,-2,3}, {-1,4}, {-3,-4,5}, {-8,-5,6}, {-5,7}, {-6,-7}});
-    std::cout << s.watch_lists[0][0] << std::endl;
     s.assume(internal_representation(8));
     CHECK(s.propagate() == std::nullopt);
     s.assume(internal_representation(2));
     CHECK(s.propagate() == std::nullopt);
     s.assume(internal_representation(1));
     CHECK(s.propagate() == s.clauses[5]);
+    CHECK(s.current_decision_level() == 3);
+    check_decision_levels(s, {3,2,3,3,3,3,3,1});
+    check_antecedent_clauses(s, {-1, -1, 0, 1, 2, 3, 4, -1});
 }
 
 

@@ -40,7 +40,7 @@ bool Solver::enqueue(Literal_t literal, std::optional<std::reference_wrapper<Cla
     } else {
         assignments[var_index(literal)] = lsign(literal);
         trail.push_back(literal);
-        // level[var_index(literal)] = currentDecisionLevel();
+        decision_levels[var_index(literal)] = current_decision_level();
         antecedent_clauses[var_index(literal)] = reason;
         propagation_queue.push(literal);
         return true;
@@ -107,7 +107,7 @@ void Solver::addClauses(const std::vector<std::vector<int>>& input_clauses) {
     }
 }
 
-int Solver::decision_level() const {
+int Solver::current_decision_level() const {
     return trail_limits.size();
 }
 
