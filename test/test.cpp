@@ -73,6 +73,7 @@ TEST_CASE("Unit propagation conflict") {
 }
 
 TEST_CASE("Clause Learning") {
+    // Example from Handbook of Satisfiability (new Version)
     Solver s;
     s.setNumberOfVariables(8);
     s.addClauses({{-1,-2,3}, {-1,4}, {-3,-4,5}, {-8,-5,6}, {-5,7}, {-6,-7}});
@@ -81,10 +82,77 @@ TEST_CASE("Clause Learning") {
     s.assume(internal_representation(2));
     CHECK(s.propagate() == std::nullopt);
     s.assume(internal_representation(1));
-    CHECK(s.propagate() == s.clauses[5]);
+    auto conflicting_clause = s.propagate();
+    CHECK(conflicting_clause == s.clauses[5]);
     CHECK(s.current_decision_level() == 3);
     check_decision_levels(s, {3,2,3,3,3,3,3,1});
     check_antecedent_clauses(s, {-1, -1, 0, 1, 2, 3, 4, -1});
+    std::vector<Literal_t> learnt_clause;
+    int backtrack_level = 0;
+    s.analyse_conflict(conflicting_clause.value(), learnt_clause, backtrack_level);
+    std::vector<Literal_t> expected_learnt_clause = {internal_representation(-5), internal_representation(-8)};
+    CHECK(learnt_clause == expected_learnt_clause);
+    CHECK(backtrack_level == 1);
+}
+
+TEST_CASE("Clause Learning - minimal") {
+    // Simple example: Assignment of one variable leads to contradiction
+    Solver s;
+    s.setNumberOfVariables(2);
+    s.addClauses({{2, -1}, {1, 2}});
+    s.assume(internal_representation(-2));
+    auto conflicting_clause = s.propagate();
+    CHECK(conflicting_clause == s.clauses[1]);
+    std::vector<Literal_t> learnt_clause;
+    int backtrack_level = 0;
+    auto conflict = conflicting_clause.value();
+    s.analyse_conflict(conflict, learnt_clause, backtrack_level);
+    std::vector<Literal_t> expected_learnt_clause = {internal_representation(2)};
+    CHECK(expected_learnt_clause == learnt_clause);
+}
+
+TEST_CASE("Clause Learning - 2") {
+    // Simple example: Assignment of one variable leads to contradiction
+    Solver s;
+    s.setNumberOfVariables(3);
+    s.addClauses({{1, -3}, {-3, 2}, {-2,-3,-1}});
+    s.assume(internal_representation(3));
+    auto conflicting_clause = s.propagate();
+    CHECK(conflicting_clause == s.clauses[2]);
+    std::vector<Literal_t> learnt_clause;
+    int backtrack_level = 0;
+    auto conflict = conflicting_clause.value();
+    s.analyse_conflict(conflict, learnt_clause, backtrack_level);
+    std::vector<Literal_t> expected_learnt_clause = {internal_representation(-3)};
+    CHECK(expected_learnt_clause == learnt_clause);
+}
+
+TEST_CASE("Clause Learning - Varisat Example") {
+    // Example from Varisat blog
+    Solver s;
+    s.setNumberOfVariables(10);
+    s.addClauses({{1,2,3,4}, {1,2,3,-4}, {5,6}, {7,8}, {9,10}});
+    s.assume(internal_representation(-9));
+    CHECK(s.propagate() == std::nullopt);
+    s.assume(internal_representation(-2));
+    CHECK(s.propagate() == std::nullopt);
+    s.assume(internal_representation(-7));
+    CHECK(s.propagate() == std::nullopt);
+    s.assume(internal_representation(-3));
+    CHECK(s.propagate() == std::nullopt);
+    s.assume(internal_representation(-6));
+    CHECK(s.propagate() == std::nullopt);
+    s.assume(internal_representation(-1));
+    auto conflicting_clause = s.propagate();
+    CHECK(conflicting_clause == s.clauses[1]);
+    std::vector<Literal_t> learnt_clause;
+    int backtrack_level = 0;
+    auto conflict = conflicting_clause.value();
+    s.analyse_conflict(conflict, learnt_clause, backtrack_level);
+    std::vector<Literal_t> expected_learnt_clause = {internal_representation(1), internal_representation(2),
+                                                     internal_representation(3)};
+    CHECK(expected_learnt_clause == learnt_clause);
+    CHECK(backtrack_level == 4);
 }
 
 

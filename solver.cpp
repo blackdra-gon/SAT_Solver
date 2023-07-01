@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <functional>
+#include <cassert>
 #include "solver.h"
 #include "clause.h"
 #include "encoding_util.h"
@@ -114,4 +115,69 @@ int Solver::current_decision_level() const {
 bool Solver::assume(Literal_t literal) {
     trail_limits.push_back(trail.size());
     return enqueue(literal);
+}
+
+// Warning: changes the content of conflicting clause
+void Solver::analyse_conflict(ClauseRef &conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level) {
+    std::vector<bool> seen(assignments.size(), false);
+    int counter = 0;
+    std::optional<Literal_t> p = std::nullopt;
+    std::vector<Literal_t> p_reason;
+
+    // reserve the first entry for literal of current decision level.
+    out_learnt.push_back(UINT32_MAX);
+    out_bt_level = 0;
+    do {
+        p_reason.clear();
+        conflicting_clause.get().calc_reason(*this, p, p_reason);
+        // Trace reason for p
+        for (int j = 0; j < p_reason.size(); j++) {
+            Literal_t q = p_reason[j];
+            if (!seen[var_index(q)]) {
+                seen[var_index(q)] = true;
+                if (decision_levels[var_index(q)] == current_decision_level()) {
+                    ++counter;
+                } else { // check for decision level > 0 ?
+                    out_learnt.push_back(negate_literal(q));
+                    out_bt_level = std::max(out_bt_level, decision_levels[var_index(q)]);
+                }
+            }
+        }
+        // Go back the trail to select next literal to look at
+        do {
+            p = trail.back();
+            auto antecedent_clause = antecedent_clauses[var_index(p.value())];
+            if (antecedent_clause) {
+                conflicting_clause = antecedent_clause.value();
+            } else {
+                // decision variable of current level found: No need to go further
+                --counter;
+                assert(counter == 0);
+            }
+
+            pop_trail();
+        } while (!seen[var_index(p.value())]);
+        --counter;
+    } while (counter > 0);
+    out_learnt[0] = negate_literal(p.value());
+
+}
+
+void Solver::pop_trail() {
+    Literal_t p = trail.back();
+    Variable_t x = var_index(p);
+    assignments[x] = UNASSIGNED;
+    antecedent_clauses[x] = std::nullopt;
+    decision_levels[x] = DECISION_LEVEL_UNASSIGNED;
+    // order.undo(x);
+    trail.pop_back();
+}
+
+void Solver::backtrack_until(int level) {
+
+}
+
+void Solver::backtrack_one_level() {
+    int steps = trail.size() - trail_limits.back();
+    for (; steps != 0)
 }

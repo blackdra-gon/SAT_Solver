@@ -40,6 +40,7 @@ public:
 
     lbool value(Literal_t);
 public:
+    void analyse_conflict(ClauseRef& conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level);
     void addClause(const Clause&);
     /**
      *
@@ -63,6 +64,9 @@ public:
     int current_decision_level() const;
 
     bool assume(Literal_t literal);
+    void pop_trail();
+    void backtrack_until(int level);
+    void backtrack_one_level();
 };
 
 #endif //SAT_SOLVER_SOLVER_H

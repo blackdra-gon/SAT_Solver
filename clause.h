@@ -6,6 +6,7 @@
 #define SAT_SOLVER_CLAUSE_H
 
 #include <vector>
+#include <optional>
 #include "solver_structs.h"
 
 class ClauseRef;
@@ -28,6 +29,14 @@ public:
      * @return false, if conflict occurs. true on succes
      */
     bool propagate(Solver& s, Literal_t l);
+    /**
+     *
+     * @param s Solver
+     * @param l either this->literals[0] or std::nullopt
+     * @param out_reason return all literals, which are reason for the conflict (the negation of all literals of the clause), or
+     * which are reason for l to be assigned (the negation of all literals of the clause but l)
+     */
+    void calc_reason(Solver& s, std::optional<Literal_t> l, std::vector<Literal_t> &out_reason);
 
     friend std::ostream& operator<<(std::ostream& os, const Clause& output);
 };

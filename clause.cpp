@@ -52,3 +52,11 @@ std::ostream &operator<<(std::ostream &os, const Clause &output) {
 bool Clause::operator==(const ClauseRef &other) const {
     return *this == other.get();
 }
+
+void Clause::calc_reason(Solver &s, std::optional<Literal_t> l, std::vector<Literal_t> &out_reason) {
+    int i = l ? 1 : 0;
+    for (; i < literals.size(); ++i) {
+        out_reason.push_back(negate_literal(literals[i]));
+    }
+    // Bump clause activity for learnt clauses
+}
