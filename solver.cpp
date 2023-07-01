@@ -174,10 +174,15 @@ void Solver::pop_trail() {
 }
 
 void Solver::backtrack_until(int level) {
-
+    while (current_decision_level() > level) {
+        backtrack_one_level();
+    }
 }
 
 void Solver::backtrack_one_level() {
     int steps = trail.size() - trail_limits.back();
-    for (; steps != 0)
+    for (; steps != 0; --steps) {
+        pop_trail();
+    }
+    trail_limits.pop_back();
 }

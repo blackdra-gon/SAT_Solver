@@ -144,6 +144,8 @@ TEST_CASE("Clause Learning - Varisat Example") {
     CHECK(s.propagate() == std::nullopt);
     s.assume(internal_representation(-1));
     auto conflicting_clause = s.propagate();
+    check_assignments(s, {FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE});
+    check_trail(s, {-9, 10, -2, -7, 8, -3, -6, 5, -1, 4});
     CHECK(conflicting_clause == s.clauses[1]);
     std::vector<Literal_t> learnt_clause;
     int backtrack_level = 0;
@@ -153,6 +155,9 @@ TEST_CASE("Clause Learning - Varisat Example") {
                                                      internal_representation(3)};
     CHECK(expected_learnt_clause == learnt_clause);
     CHECK(backtrack_level == 4);
+    s.backtrack_until(backtrack_level);
+    check_assignments(s, {UNASSIGNED, FALSE, FALSE, UNASSIGNED, UNASSIGNED, UNASSIGNED, FALSE, TRUE, FALSE, TRUE});
+    check_trail(s, {-9, 10, -2, -7, 8, -3});
 }
 
 
