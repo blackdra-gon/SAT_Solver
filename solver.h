@@ -53,7 +53,7 @@ public:
     lbool value(Literal_t);
 public:
     void analyse_conflict(ClauseRef& conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level);
-    void addClause(const Clause&);
+    void addClause(const std::vector<Literal_t> &);
     /**
      *
      * @param clauses in dimacs representation

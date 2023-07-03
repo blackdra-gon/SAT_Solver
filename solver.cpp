@@ -10,19 +10,19 @@
 #include "encoding_util.h"
 
 
-void Solver::addClause(const Clause& clause) {
-    if (clause.literals.empty()) {
+void Solver::addClause(const std::vector<Literal_t> &clause) {
+    if (clause.empty()) {
         std::cout << "WARNING: Tried to add empty clause" << std::endl;
-    } else if (clause.literals.size() == 1) {
-        enqueue(clause.literals.back());
+    } else if (clause.size() == 1) {
+        enqueue(clause.back());
     } else {
-        clauses.push_back(clause);
+        clauses.emplace_back(clause);
         if (clauses.size() == 1) {
             ClauseRef::setClausesBaseAddress(&clauses[0]);
         }
         // Add clause to the watchlist of the negation of the two first elements
-        watch_lists[negate_literal(clause.literals[0])].emplace_back(std::ref(clauses.back()));
-        watch_lists[negate_literal(clause.literals[1])].emplace_back(std::ref(clauses.back()));
+        watch_lists[negate_literal(clause[0])].emplace_back(std::ref(clauses.back()));
+        watch_lists[negate_literal(clause[1])].emplace_back(std::ref(clauses.back()));
     }
 }
 

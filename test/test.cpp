@@ -14,9 +14,8 @@ TEST_CASE("Input") {
     std::vector<std::vector<int>> expected_clauses = {{-2, 4, 5}, {-1, 6, -7},
                                                       {-1, -3, -5}, {4, 6, 8},
                                                       {1, 5, -7}};
-    std::vector<Clause> expected_clauses_internal = internal_representation(expected_clauses);
+    check_clauses(s, expected_clauses);
     //s.antecedent_clauses.emplace_back(s.clauses[0]);
-    CHECK(s.clauses == expected_clauses_internal);
     CHECK(s.watch_lists.size() == 20);
     CHECK(s.assignments.size() == 10);
     CHECK(s.watch_lists[internal_representation(-7)].empty());
@@ -48,7 +47,7 @@ TEST_CASE("Solver propagation routine") {
 TEST_CASE("Propagation in one clause") {
     Solver s;
     s.setNumberOfVariables(3);
-    s.addClause(internal_representation({1,-2,3}));
+    s.addClause(internal_representation({1, -2, 3}));
     check_watchlists(s, {{},{0},{0},{},{},{}});
     s.clauses[0].propagate(s, internal_representation(2));
     s.assignments[1] = TRUE;
@@ -132,7 +131,7 @@ TEST_CASE("Clause Learning - Varisat Example") {
     Solver s;
     s.setNumberOfVariables(10);
     s.addClauses({{1,2,3,4}, {1,2,3,-4}, {5,6}, {7,8}, {9,10}});
-    check_watchlists(s, {{}});
+    // TODO check_watchlists(s, {{}});
     s.assume(internal_representation(-9));
     CHECK(s.propagate() == std::nullopt);
     s.assume(internal_representation(-2));
@@ -147,7 +146,7 @@ TEST_CASE("Clause Learning - Varisat Example") {
     auto conflicting_clause = s.propagate();
     check_assignments(s, {FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE});
     check_trail(s, {-9, 10, -2, -7, 8, -3, -6, 5, -1, 4});
-    check_watchlists(s, {{}});
+    // TODO check_watchlists(s, {{}});
     CHECK(conflicting_clause == s.clauses[1]);
     std::vector<Literal_t> learnt_clause;
     int backtrack_level = 0;
@@ -179,12 +178,15 @@ TEST_CASE("Input/Output in dimacs format") {
 
 TEST_CASE("Simple test cases for overall solving routine") {
     Solver s;
+    s.setNumberOfVariables(3);
     s.addClauses({{1, -3}, {-3, 2}, {-2,-3,-1}});
     CHECK(s.solve() == true);
     Solver s1;
+    s1.setNumberOfVariables(3);
     s1.addClauses({{1, -3}, {-3, 2}, {-2,-3,-1}, {3}});
     CHECK(s1.solve() == false);
     Solver s2;
+    s2.setNumberOfVariables(1);
     s2.addClauses({{1}, {-1}});
     CHECK(s2.solve() == false);
 

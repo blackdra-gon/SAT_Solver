@@ -5,6 +5,7 @@
 #ifndef SAT_SOLVER_CLAUSE_H
 #define SAT_SOLVER_CLAUSE_H
 
+#include <utility>
 #include <vector>
 #include <optional>
 #include "solver_structs.h"
@@ -15,6 +16,8 @@ class Solver;
 
 class Clause {
 public:
+    explicit Clause(std::vector<Literal_t> literals): literals(std::move(literals)) {}
+
     std::vector<Literal_t> literals;
 
     bool operator==(const Clause& other) const;

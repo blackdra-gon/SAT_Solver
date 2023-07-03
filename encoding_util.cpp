@@ -28,16 +28,16 @@ int dimacs_format(Variable_t internal_variable) {
     return output;
 }
 
-Clause internal_representation(const std::vector<int>& input) {
-    Clause output = {};
+std::vector<Literal_t> internal_representation(const std::vector<int>& input) {
+    std::vector<Literal_t> output = {};
     for (int x: input) {
-        output.literals.push_back(internal_representation(x));
+        output.push_back(internal_representation(x));
     }
     return output;
 }
 
-std::vector<Clause> internal_representation(const std::vector<std::vector<int>> &input) {
-    std::vector<Clause> output;
+std::vector<std::vector<Literal_t>> internal_representation(const std::vector<std::vector<int>> &input) {
+    std::vector<std::vector<Literal_t>> output;
     for (auto x: input) {
         output.push_back(internal_representation(x));
     }

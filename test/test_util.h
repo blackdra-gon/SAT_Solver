@@ -40,7 +40,11 @@ void check_watchlists(Solver &s, const std::vector<std::vector<int>>& expected_c
 }
 
 void check_clauses(Solver &s, const std::vector<std::vector<int>>& expected_clauses) {
-    CHECK(s.clauses == internal_representation(expected_clauses));
+    std::vector<Clause> expected;
+    for (const auto& clause: expected_clauses) {
+        expected.emplace_back(internal_representation(clause));
+    }
+    CHECK(s.clauses == expected);
 }
 
 void check_trail(Solver &s, std::vector<int> expected_assignments) {

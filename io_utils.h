@@ -19,6 +19,7 @@ class Reader : public lorina::dimacs_reader
 {
 private:
     Solver &solver;
+    mutable std::vector<std::vector<int>> clauses_internal;
 
 public:
     explicit Reader(Solver &solver) : solver(solver) {}
@@ -38,18 +39,13 @@ public:
     }
     void on_clause(const std::vector<int> &clause_input) const override
     {
-        Clause clause_store;
 
-        for (int literal: clause_input) {
-            clause_store.literals.push_back(internal_representation(literal));
-        }
-        solver.addClause(clause_store);
-
+        clauses_internal.push_back(clause_input);
 
     }
     void on_end() const override
     {
-        ClauseRef::setClausesBaseAddress(&solver.clauses[0]);
+        solver.addClauses(clauses_internal);
     }
 
 
