@@ -186,3 +186,15 @@ void Solver::backtrack_one_level() {
     }
     trail_limits.pop_back();
 }
+
+void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
+
+}
+
+bool Solver::solve() {
+    return false;
+}
+
+lbool Solver::search() {
+    return FALSE;
+}

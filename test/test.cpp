@@ -132,6 +132,7 @@ TEST_CASE("Clause Learning - Varisat Example") {
     Solver s;
     s.setNumberOfVariables(10);
     s.addClauses({{1,2,3,4}, {1,2,3,-4}, {5,6}, {7,8}, {9,10}});
+    check_watchlists(s, {{}});
     s.assume(internal_representation(-9));
     CHECK(s.propagate() == std::nullopt);
     s.assume(internal_representation(-2));
@@ -146,6 +147,7 @@ TEST_CASE("Clause Learning - Varisat Example") {
     auto conflicting_clause = s.propagate();
     check_assignments(s, {FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE});
     check_trail(s, {-9, 10, -2, -7, 8, -3, -6, 5, -1, 4});
+    check_watchlists(s, {{}});
     CHECK(conflicting_clause == s.clauses[1]);
     std::vector<Literal_t> learnt_clause;
     int backtrack_level = 0;
@@ -156,6 +158,7 @@ TEST_CASE("Clause Learning - Varisat Example") {
     CHECK(expected_learnt_clause == learnt_clause);
     CHECK(backtrack_level == 4);
     s.backtrack_until(backtrack_level);
+    s.record_learnt_clause(learnt_clause);
     check_assignments(s, {UNASSIGNED, FALSE, FALSE, UNASSIGNED, UNASSIGNED, UNASSIGNED, FALSE, TRUE, FALSE, TRUE});
     check_trail(s, {-9, 10, -2, -7, 8, -3});
 }
@@ -172,6 +175,19 @@ TEST_CASE("Input/Output in dimacs format") {
     REQUIRE(dimacs_format(1) == -1);
     REQUIRE(dimacs_format(12) == 7);
     REQUIRE(dimacs_format(0) == 1);
+}
+
+TEST_CASE("Simple test cases for overall solving routine") {
+    Solver s;
+    s.addClauses({{1, -3}, {-3, 2}, {-2,-3,-1}});
+    CHECK(s.solve() == true);
+    Solver s1;
+    s1.addClauses({{1, -3}, {-3, 2}, {-2,-3,-1}, {3}});
+    CHECK(s1.solve() == false);
+    Solver s2;
+    s2.addClauses({{1}, {-1}});
+    CHECK(s2.solve() == false);
+
 }
 
 

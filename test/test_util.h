@@ -9,9 +9,15 @@ void check_assignments(Solver &s, std::vector<lbool> expected_values) {
     CHECK(s.assignments == expected_values);
 }
 
-// Takes the indeces of the clause in the watchlist as parameter
+
 // Ideas for making this check weaker: do not check the order inside a watchlist; just check, if the expected clauses
 // are a subset of the clause actually in the watchlist
+/**
+ *
+ * @param s                 solver
+ * @param expected_clauses  Takes the indeces of the clause in the watchlist as parameter. Uses negative values for the
+ *                          indices of learnt clauses (starts to count them by 1: -1 means learnt_clauses[0]
+ */
 void check_watchlists(Solver &s, const std::vector<std::vector<int>>& expected_clauses) {
     if (s.watch_lists.size() != expected_clauses.size()) {
         std::cout << "Expected and actual watchlists differ in length";
@@ -23,7 +29,12 @@ void check_watchlists(Solver &s, const std::vector<std::vector<int>>& expected_c
             CHECK(false);
         }
         for (int j = 0; j < s.watch_lists[i].size(); ++j) {
-            CHECK(s.watch_lists[i][j] == s.clauses[expected_clauses[i][j]]);
+            int clause_index = expected_clauses[i][j];
+            if (clause_index >= 0) {
+                CHECK(s.watch_lists[i][j] == s.clauses[clause_index]);
+            } else {
+                CHECK(s.watch_lists[i][j] == s.learnt_clauses[-clause_index - 1]);
+            }
         }
     }
 }

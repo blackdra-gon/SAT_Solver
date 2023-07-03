@@ -18,9 +18,21 @@ using Watchlists = std::vector<std::vector<std::reference_wrapper<Clause>>>;
 
 class Solver {
 public:
+    /**
+     * function to be called after importing clauses to solve the formular
+     * @return true: satisfiable, false: unsatisfiable
+     */
+    bool solve();
+
+    /**
+     * is called internaly by solve() to look for a solution. Might return UNASSIGNED, when restarts are implemented
+     * @return
+     */
+    lbool search();
 
 
     std::vector<Clause> clauses;
+    std::vector<Clause> learnt_clauses;
     std::queue<Literal_t> propagation_queue;
     std::vector<std::vector<ClauseRef>> watch_lists; // literal indexed
 
@@ -67,6 +79,7 @@ public:
     void pop_trail();
     void backtrack_until(int level);
     void backtrack_one_level();
+    void record_learnt_clause( const std::vector<Literal_t>& clause);
 };
 
 #endif //SAT_SOLVER_SOLVER_H
