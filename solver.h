@@ -12,6 +12,7 @@
 #include "solver_structs.h"
 #include "clause.h"
 #include "clauseRef.h"
+#include "variable_order.h"
 
 using Watchlists = std::vector<std::vector<std::reference_wrapper<Clause>>>;
 
@@ -50,10 +51,15 @@ public:
     std::vector<std::optional<ClauseRef>> antecedent_clauses; // variable indexed
     std::vector<int> decision_levels; // variable indexed
 
+    VariableOrder variableOrder;
+    // To be replaced with VariableOrder
+    Literal_t next_unassigned_variable();
+
     lbool value(Literal_t);
 public:
     void analyse_conflict(ClauseRef& conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level);
-    void addClause(const std::vector<Literal_t> &);
+    void addClause(const std::vector<Literal_t> &clause, bool learnt);
+
     /**
      *
      * @param clauses in dimacs representation
@@ -66,7 +72,7 @@ public:
      * @param reason clause, which implied this unit constraint
      * @return true on succes, false if a conflict was detected
      */
-    bool enqueue(Literal_t literal, std::optional<std::reference_wrapper<Clause>> reason=std::nullopt);
+    bool enqueue(Literal_t literal, std::optional<ClauseRef> reason=std::nullopt);
     /**
      * Propagates all entries of the propagation queue to all clauses on the watchlist of the respective literal.
      * In case of a conflict, returns the clause which causes the conflict.
@@ -80,6 +86,9 @@ public:
     void backtrack_until(int level);
     void backtrack_one_level();
     void record_learnt_clause( const std::vector<Literal_t>& clause);
+
+    void print_clauses();
+    friend class VariableOrder;
 };
 
 #endif //SAT_SOLVER_SOLVER_H

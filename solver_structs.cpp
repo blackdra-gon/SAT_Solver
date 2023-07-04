@@ -56,3 +56,16 @@ lbool operator!(lbool b) {
     return b == TRUE ? FALSE : b == FALSE ? TRUE : UNASSIGNED;
 }
 
+std::ostream &operator<<(std::ostream &os, const std::vector<Literal_t> &output) {
+    os << "{";
+    for (auto l: output) {
+        if (l == output.back()) {
+            os << dimacs_format(l);
+        } else {
+            os << dimacs_format(l) << ", ";
+        }
+    }
+    os << "}";
+    return os;
+}
+

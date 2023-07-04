@@ -52,7 +52,10 @@ class ClauseRefPrinter:
         self.val = val
 
     def to_string(self):
-        return 'Clause[' + str(self.val['index']) + ']'
+        if self.val['learnt']:
+            return 'Learnt_Clause[' + str(self.val['index']) + ']'
+        else:
+            return 'Clause[' + str(self.val['index']) + ']'
 
 
 def my_pp_func(val):

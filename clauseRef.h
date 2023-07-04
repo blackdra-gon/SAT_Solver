@@ -11,6 +11,15 @@
 class ClauseRef {
     std::reference_wrapper<Clause> ref;
     static Clause* clauses_base_address;
+    static Clause* learnt_clauses_base_address;
+public:
+    static Clause *getLearntClausesBaseAddress();
+
+private:
+    bool learnt;
+public:
+    static void setLearntClausesBaseAddress(Clause *learntClausesBaseAddress);
+
 public:
     static Clause *getClausesBaseAddress();
     ClauseIndex_t index;

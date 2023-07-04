@@ -1,2 +1,2 @@
 
-cnfgen randkcnf 3 10 30
+cnfgen randkcnf 3 20 80

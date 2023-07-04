@@ -47,7 +47,7 @@ TEST_CASE("Solver propagation routine") {
 TEST_CASE("Propagation in one clause") {
     Solver s;
     s.setNumberOfVariables(3);
-    s.addClause(internal_representation({1, -2, 3}));
+    s.addClause(internal_representation({1, -2, 3}), false);
     check_watchlists(s, {{},{0},{0},{},{},{}});
     s.clauses[0].propagate(s, internal_representation(2));
     s.assignments[1] = TRUE;
@@ -131,7 +131,9 @@ TEST_CASE("Clause Learning - Varisat Example") {
     Solver s;
     s.setNumberOfVariables(10);
     s.addClauses({{1,2,3,4}, {1,2,3,-4}, {5,6}, {7,8}, {9,10}});
-    // TODO check_watchlists(s, {{}});
+    check_watchlists(s, {{}, {0,1}, {}, {0,1}, {}, {},
+                                    /*4*/ {}, {}, {}, {2}, {}, {2},
+                                    /*7*/ {}, {3}, {}, {3}, {}, {4}, {}, {4}});
     s.assume(internal_representation(-9));
     CHECK(s.propagate() == std::nullopt);
     s.assume(internal_representation(-2));
@@ -146,7 +148,9 @@ TEST_CASE("Clause Learning - Varisat Example") {
     auto conflicting_clause = s.propagate();
     check_assignments(s, {FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE});
     check_trail(s, {-9, 10, -2, -7, 8, -3, -6, 5, -1, 4});
-    // TODO check_watchlists(s, {{}});
+    check_watchlists(s, {{}, {0,1}, {}, {}, {}, {},
+            /*4*/ {1}, {0}, {}, {2}, {}, {2},
+            /*7*/ {}, {3}, {}, {3}, {}, {4}, {}, {4}});
     CHECK(conflicting_clause == s.clauses[1]);
     std::vector<Literal_t> learnt_clause;
     int backtrack_level = 0;
@@ -158,8 +162,11 @@ TEST_CASE("Clause Learning - Varisat Example") {
     CHECK(backtrack_level == 4);
     s.backtrack_until(backtrack_level);
     s.record_learnt_clause(learnt_clause);
-    check_assignments(s, {UNASSIGNED, FALSE, FALSE, UNASSIGNED, UNASSIGNED, UNASSIGNED, FALSE, TRUE, FALSE, TRUE});
-    check_trail(s, {-9, 10, -2, -7, 8, -3});
+    check_assignments(s, {TRUE, FALSE, FALSE, UNASSIGNED, UNASSIGNED, UNASSIGNED, FALSE, TRUE, FALSE, TRUE});
+    check_trail(s, {-9, 10, -2, -7, 8, -3, 1});
+    check_watchlists(s, {{}, {0,1,-1}, {}, {-1}, {}, {},
+            /*4*/ {1}, {0}, {}, {2}, {}, {2},
+            /*7*/ {}, {3}, {}, {3}, {}, {4}, {}, {4}});
 }
 
 
@@ -218,4 +225,12 @@ TEST_CASE("Negate Literal") {
     REQUIRE(negate_literal(1) == 0);
     REQUIRE(negate_literal(10) == 11);
     REQUIRE(negate_literal(13) == 12);
+}
+
+TEST_CASE("Search routine") {
+    Solver s;
+    s.setNumberOfVariables(10);
+    s.addClauses({{-1,-2,-3,-4}, {-1,-2,-3,4}, {5,6}, {7,8}, {9,10}});
+    CHECK(s.search() == TRUE);
+
 }

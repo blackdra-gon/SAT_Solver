@@ -5,6 +5,7 @@
 #include "clauseRef.h"
 
 Clause* ClauseRef::clauses_base_address = std::nullptr_t();
+Clause* ClauseRef::learnt_clauses_base_address = std::nullptr_t();
 
 Clause& ClauseRef::get() const{
     return ref.get();
@@ -12,7 +13,9 @@ Clause& ClauseRef::get() const{
 
 ClauseRef::ClauseRef(std::reference_wrapper<Clause> ref) : ref(ref)  {
     auto address = &get();
-    auto offset = address - ClauseRef::getClausesBaseAddress();
+    learnt = get().learnt;
+    Clause* base_address = learnt ? ClauseRef::getLearntClausesBaseAddress() : ClauseRef::getClausesBaseAddress();
+    auto offset = address - base_address;
     index = offset;
 }
 
@@ -25,11 +28,23 @@ void ClauseRef::setClausesBaseAddress(Clause *clausesBaseAddress) {
 }
 
 std::ostream &operator<<(std::ostream &os, const ClauseRef &output) {
-    os << "Clause[" << output.index << "]";
+    if (output.learnt) {
+        os << "Learnt_Clause[" << output.index << "]";
+    } else {
+        os << "Clause[" << output.index << "]";
+    }
     return os;
 }
 
 Clause *ClauseRef::getClausesBaseAddress() {
     return clauses_base_address;
+}
+
+void ClauseRef::setLearntClausesBaseAddress(Clause *learntClausesBaseAddress) {
+    learnt_clauses_base_address = learntClausesBaseAddress;
+}
+
+Clause *ClauseRef::getLearntClausesBaseAddress() {
+    return learnt_clauses_base_address;
 }
 

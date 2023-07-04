@@ -16,9 +16,10 @@ class Solver;
 
 class Clause {
 public:
-    explicit Clause(std::vector<Literal_t> literals): literals(std::move(literals)) {}
+    explicit Clause(std::vector<Literal_t> literals, bool learnt= false): literals(std::move(literals)), learnt(learnt) {}
 
     std::vector<Literal_t> literals;
+    bool learnt;
 
     bool operator==(const Clause& other) const;
     bool operator==(const ClauseRef& other) const;
