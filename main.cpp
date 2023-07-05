@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
         try {
             import_from_file(input_file, s);
         } catch (std::exception &e) {
-            std::cerr << e.what();
+            std::cerr << e.what() << std::endl;
             return 1;
         }
 

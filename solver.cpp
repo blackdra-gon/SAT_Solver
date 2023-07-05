@@ -111,7 +111,7 @@ std::optional<ClauseRef> Solver::propagate() {
  */
 void Solver::addClauses(const std::vector<std::vector<int>>& input_clauses) {
     clauses.reserve(input_clauses.size());
-    learnt_clauses.reserve(input_clauses.size());
+    learnt_clauses.reserve(input_clauses.size()*10);
     for (const auto& literal_list: input_clauses) {
         addClause(internal_representation(literal_list), false);
     }
