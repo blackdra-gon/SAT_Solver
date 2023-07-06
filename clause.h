@@ -8,13 +8,14 @@
 #include <utility>
 #include <vector>
 #include <optional>
+#include <memory>
 #include "solver_structs.h"
 
 class ClauseRef;
 class Solver;
 
 
-class Clause {
+class Clause : public std::enable_shared_from_this<Clause>{
 public:
     explicit Clause(std::vector<Literal_t> literals, bool learnt= false): literals(std::move(literals)), learnt(learnt) {}
 

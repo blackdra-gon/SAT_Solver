@@ -9,6 +9,7 @@
 #include <queue>
 #include <optional>
 #include <functional>
+#include <memory>
 #include "solver_structs.h"
 #include "clause.h"
 #include "clauseRef.h"
@@ -32,10 +33,10 @@ public:
     lbool search();
 
 
-    std::vector<Clause> clauses;
-    std::vector<Clause> learnt_clauses;
+    std::vector<std::shared_ptr<Clause>> clauses;
+    std::vector<std::shared_ptr<Clause>> learnt_clauses;
     std::queue<Literal_t> propagation_queue;
-    std::vector<std::vector<ClauseRef>> watch_lists; // literal indexed
+    std::vector<std::vector<std::weak_ptr<Clause>>> watch_lists; // literal indexed
 
 
 
@@ -48,7 +49,7 @@ public:
      * conducted.
      */
     std::vector<int> trail_limits;
-    std::vector<std::optional<ClauseRef>> antecedent_clauses; // variable indexed
+    std::vector<std::optional<std::weak_ptr<Clause>>> antecedent_clauses; // variable indexed
     std::vector<int> decision_levels; // variable indexed
 
     VariableOrder variableOrder;
@@ -57,7 +58,7 @@ public:
 
     lbool value(Literal_t);
 public:
-    void analyse_conflict(ClauseRef& conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level);
+    void analyse_conflict(std::shared_ptr<Clause> conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level);
     void addClause(const std::vector<Literal_t> &clause, bool learnt);
 
     /**
@@ -72,12 +73,12 @@ public:
      * @param reason clause, which implied this unit constraint
      * @return true on succes, false if a conflict was detected
      */
-    bool enqueue(Literal_t literal, std::optional<ClauseRef> reason=std::nullopt);
+    bool enqueue(Literal_t literal, const std::optional<std::shared_ptr<Clause>>& reason=std::nullopt);
     /**
      * Propagates all entries of the propagation queue to all clauses on the watchlist of the respective literal.
      * In case of a conflict, returns the clause which causes the conflict.
      */
-    std::optional<ClauseRef> propagate();
+    std::optional<std::shared_ptr<Clause>> propagate();
 
     int current_decision_level() const;
 

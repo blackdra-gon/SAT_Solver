@@ -22,7 +22,7 @@ TEST_CASE("Input") {
     CHECK(s.watch_lists[internal_representation(7)].empty());
     CHECK(s.watch_lists[internal_representation(6)].empty());
     CHECK(s.watch_lists[internal_representation(-6)].size() == 2);
-    CHECK(s.watch_lists[internal_representation(2)].front() == s.clauses[0]);
+    CHECK(s.watch_lists[internal_representation(2)].front().lock() == s.clauses[0]);
 }
 
 TEST_CASE("Solver propagation routine") {
@@ -49,15 +49,15 @@ TEST_CASE("Propagation in one clause") {
     s.setNumberOfVariables(3);
     s.addClause(internal_representation({1, -2, 3}), false);
     check_watchlists(s, {{},{0},{0},{},{},{}});
-    s.clauses[0].propagate(s, internal_representation(2));
+    s.clauses[0]->propagate(s, internal_representation(2));
     s.assignments[1] = TRUE;
     // this has to be checked for the general propagation function
     // CHECK(s.watch_lists[internal_representation(2)].empty());
-    CHECK(s.watch_lists[internal_representation(-3)].front() == s.clauses[0]);
-    CHECK(s.watch_lists[internal_representation(-1)].front() == s.clauses[0]);
-    s.clauses[0].propagate(s, internal_representation(-1));
-    CHECK(s.watch_lists[internal_representation(-3)].front() == s.clauses[0]);
-    CHECK(s.watch_lists[internal_representation(-1)].front() == s.clauses[0]);
+    CHECK(s.watch_lists[internal_representation(-3)].front().lock() == s.clauses[0]);
+    CHECK(s.watch_lists[internal_representation(-1)].front().lock() == s.clauses[0]);
+    s.clauses[0]->propagate(s, internal_representation(-1));
+    CHECK(s.watch_lists[internal_representation(-3)].front().lock() == s.clauses[0]);
+    CHECK(s.watch_lists[internal_representation(-1)].front().lock() == s.clauses[0]);
     CHECK(s.propagation_queue.front() == internal_representation(3));
 }
 

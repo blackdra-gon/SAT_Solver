@@ -31,9 +31,9 @@ void check_watchlists(Solver &s, const std::vector<std::vector<int>>& expected_c
         for (int j = 0; j < s.watch_lists[i].size(); ++j) {
             int clause_index = expected_clauses[i][j];
             if (clause_index >= 0) {
-                CHECK(s.watch_lists[i][j] == s.clauses[clause_index]);
+                CHECK(s.watch_lists[i][j].lock() == s.clauses[clause_index]);
             } else {
-                CHECK(s.watch_lists[i][j] == s.learnt_clauses[-clause_index - 1]);
+                CHECK(s.watch_lists[i][j].lock() == s.learnt_clauses[-clause_index - 1]);
             }
         }
     }
@@ -44,7 +44,11 @@ void check_clauses(Solver &s, const std::vector<std::vector<int>>& expected_clau
     for (const auto& clause: expected_clauses) {
         expected.emplace_back(internal_representation(clause));
     }
-    CHECK(s.clauses == expected);
+    int i = 0;
+    for (const auto& clause_ptr: s.clauses) {
+        CHECK(*clause_ptr == expected[i]);
+        ++i;
+    }
 }
 
 void check_trail(Solver &s, std::vector<int> expected_assignments) {
@@ -66,7 +70,7 @@ void check_antecedent_clauses(Solver &s, std::vector<int> expected_reasons) {
         if (expected_reasons[i] == -1) {
             CHECK(s.antecedent_clauses[i] == std::nullopt);
         } else {
-            CHECK(s.antecedent_clauses[i] == s.clauses[expected_reasons[i]]);
+            CHECK(s.antecedent_clauses[i].value().lock() == s.clauses[expected_reasons[i]]);
         }
     }
     //CHECK(s.antecedent_clauses == expected_reasons);

@@ -14,26 +14,27 @@ void Solver::addClause(const std::vector<Literal_t> &clause, bool learnt) {
     if (clause.empty()) {
         std::cout << "WARNING: Tried to add empty clause" << std::endl;
     } else if (clause.size() == 1) {
+        // Does not use return value: Breaks if input has two conflicting unit assignments
         enqueue(clause.back());
     } else {
         // select vector to append to
-        std::vector<Clause> &clause_vector = learnt ? learnt_clauses : clauses;
-        clause_vector.emplace_back(clause, learnt);
+        auto &clause_vector = learnt ? learnt_clauses : clauses;
+        clause_vector.emplace_back(std::make_shared<Clause>(clause, learnt));
         // Set BaseAddress for debugging purposes
-        if (clauses.size() == 1) {
+        /*if (clauses.size() == 1) {
             ClauseRef::setClausesBaseAddress(&clauses[0]);
         }
         if (learnt_clauses.size() == 1) {
             ClauseRef::setLearntClausesBaseAddress(&learnt_clauses[0]);
-        }
+        }*/
         // Add clause to the watchlist of the negation of the two first elements
-        watch_lists[negate_literal(clause[0])].emplace_back(std::ref(clause_vector.back()));
-        watch_lists[negate_literal(clause[1])].emplace_back(std::ref(clause_vector.back()));
+        watch_lists[negate_literal(clause[0])].emplace_back(clause_vector.back());
+        watch_lists[negate_literal(clause[1])].emplace_back(clause_vector.back());
 
     }
 }
 
-bool Solver::enqueue(Literal_t literal, std::optional<ClauseRef> reason) {
+bool Solver::enqueue(Literal_t literal, const std::optional<std::shared_ptr<Clause>>& reason) {
     if (value(literal) != UNASSIGNED) {
         if (value(literal) == FALSE) {
             // Conflicting assignment found
@@ -82,23 +83,27 @@ void Solver::setNumberOfVariables(int number) {
 
 }
 
-std::optional<ClauseRef> Solver::propagate() {
+std::optional<std::shared_ptr<Clause>> Solver::propagate() {
     while (!propagation_queue.empty()) {
         Literal_t literal = propagation_queue.front();
         std::cout << "LEVEL " << current_decision_level() << ": Propagating " << dimacs_format(literal) << std::endl;
         propagation_queue.pop();
-        std::vector<ClauseRef> tmp_watchlist;
-        tmp_watchlist = watch_lists[literal];
+        auto tmp_watchlist = watch_lists[literal];
         watch_lists[literal].clear();
         //std::move(watch_lists[literal].begin(), watch_lists[literal].end(), tmp_watchlist.begin());
         for (int i = 0; i < tmp_watchlist.size(); ++i) {
-            if(!tmp_watchlist[i].get().propagate(*this, literal)) {
+            auto clause = tmp_watchlist[i].lock();
+            if (!clause) {
+                // The learnt clause referenced here was deleted in the meantime
+                continue;
+            }
+            if(!clause->propagate(*this, literal)) {
                 // Conflict occurred
                 // reinsert remaining entries from tmp_watchlist
                 for (int j = i + 1; j < tmp_watchlist.size(); ++j) {
                     watch_lists[literal].push_back(tmp_watchlist[j]);
                 }
-                return tmp_watchlist[i];
+                return clause;
             }
         }
 
@@ -110,7 +115,7 @@ std::optional<ClauseRef> Solver::propagate() {
  * @param clauses
  */
 void Solver::addClauses(const std::vector<std::vector<int>>& input_clauses) {
-    clauses.reserve(input_clauses.size());
+    //clauses.reserve(input_clauses.size());
     learnt_clauses.reserve(input_clauses.size()*10);
     for (const auto& literal_list: input_clauses) {
         addClause(internal_representation(literal_list), false);
@@ -127,7 +132,7 @@ bool Solver::assume(Literal_t literal) {
 }
 
 // Warning: changes the content of conflicting clause
-void Solver::analyse_conflict(ClauseRef &conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level) {
+void Solver::analyse_conflict(std::shared_ptr<Clause> conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level) {
     std::vector<bool> seen(assignments.size(), false);
     int counter = 0;
     std::optional<Literal_t> p = std::nullopt;
@@ -138,7 +143,7 @@ void Solver::analyse_conflict(ClauseRef &conflicting_clause, std::vector<Literal
     out_bt_level = 0;
     do {
         p_reason.clear();
-        conflicting_clause.get().calc_reason(*this, p, p_reason);
+        conflicting_clause->calc_reason(*this, p, p_reason);
         // Trace reason for p
         for (int j = 0; j < p_reason.size(); j++) {
             Literal_t q = p_reason[j];
@@ -157,7 +162,9 @@ void Solver::analyse_conflict(ClauseRef &conflicting_clause, std::vector<Literal
             p = trail.back();
             auto antecedent_clause = antecedent_clauses[var_index(p.value())];
             if (antecedent_clause) {
-                conflicting_clause = antecedent_clause.value();
+                // learnt clauses which are antecedent clause are locked and should not be deleted
+                assert(antecedent_clause.value().lock());
+                conflicting_clause = antecedent_clause.value().lock();
             } else {
                 // decision variable of current level found: No need to go further
                 --counter;
@@ -197,10 +204,10 @@ void Solver::backtrack_one_level() {
 }
 
 void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
-    if (learnt_clauses.size() == learnt_clauses.capacity()) {
+    /*if (learnt_clauses.size() == learnt_clauses.capacity()) {
         std::cout << "WARNING: Capacity limit for storing learnt clause reached, will not store further clauses";
         return;
-    }
+    }*/
     if (clause.size() > 1) {
         addClause(clause, true);
         enqueue(clause[0], std::ref(learnt_clauses.back()));
@@ -221,7 +228,7 @@ lbool Solver::search() {
         auto conflicting_clause = propagate();
         if (conflicting_clause) {
             // Conflict handling
-            std::cout << "Conflict in " << conflicting_clause.value() << std::endl;
+            std::cout << "Conflict in " << *conflicting_clause.value() << std::endl;
             if (current_decision_level() == 0) {
                 return FALSE;
             }
@@ -258,12 +265,12 @@ Literal_t Solver::next_unassigned_variable() {
 
 void Solver::print_clauses() {
     for (const auto& clause: clauses) {
-        std::cout << clause << std::endl;
+        std::cout << *clause << std::endl;
     }
     if (!learnt_clauses.empty()) {
         std::cout << "Learnt Clauses:" << std::endl;
         for (const auto& clause: learnt_clauses) {
-            std::cout << clause << std::endl;
+            std::cout << *clause << std::endl;
         }
     }
 }

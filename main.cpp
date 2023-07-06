@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     }
     s.print_clauses();
     s.search();
-    s.print_clauses();
+    //s.print_clauses();
 
 
 
