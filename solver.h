@@ -52,7 +52,11 @@ public:
     std::vector<std::optional<std::weak_ptr<Clause>>> antecedent_clauses; // variable indexed
     std::vector<int> decision_levels; // variable indexed
 
+    // Variable ordering
     VariableOrder variableOrder;
+    std::vector<double> var_activities; // variable indexed
+    void bumpVariable(Variable_t var);
+    void decayActivities();
     // To be replaced with VariableOrder
     Literal_t next_unassigned_variable();
 

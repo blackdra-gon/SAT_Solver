@@ -92,6 +92,7 @@ TEST_CASE("Clause Learning") {
     std::vector<Literal_t> expected_learnt_clause = {internal_representation(-5), internal_representation(-8)};
     CHECK(learnt_clause == expected_learnt_clause);
     CHECK(backtrack_level == 1);
+
 }
 
 TEST_CASE("Clause Learning - minimal") {

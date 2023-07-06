@@ -36,6 +36,11 @@ void Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
             auto i = index_of_highest_decision_level(*clause);
             clause->literals[1] = clause->literals[i];
             clause->literals[i] = literals[1];
+            // Bumping
+            for (auto literal: literals) {
+                bumpVariable(var_index(literal));
+                // TODO Bump Clause
+            }
         }
         // Add clause to the watchlist of the negation of the two first elements
         watch_lists[negate_literal(clause->literals[0])].emplace_back(clause);
@@ -79,16 +84,19 @@ void Solver::setNumberOfVariables(int number) {
     decision_levels.clear();
     antecedent_clauses.clear();
     watch_lists.clear();
+    var_activities.clear();
     assignments.reserve(number);
     decision_levels.reserve(number);
     antecedent_clauses.reserve(number);
     watch_lists.reserve(2*number);
+    var_activities.reserve(number);
     for (; number > 0; --number) {
         assignments.push_back(UNASSIGNED);
         decision_levels.push_back(DECISION_LEVEL_UNASSIGNED);
         antecedent_clauses.emplace_back();
         watch_lists.emplace_back();
         watch_lists.emplace_back();
+        var_activities.push_back(1);
     }
 
 }
@@ -249,6 +257,7 @@ lbool Solver::search() {
             backtrack_until(backtrack_level);
             std::cout << "Learnt clause: " << learnt_clause << std::endl;
             record_learnt_clause(learnt_clause);
+            decayActivities();
         } else {
             // No conflict
             if (trail.size() == assignments.size()) {
@@ -266,11 +275,17 @@ lbool Solver::search() {
 }
 
 Literal_t Solver::next_unassigned_variable() {
+    double max_activity = 0;
+    Variable_t max_index = UINT32_MAX;
     for (int i = 0; i < assignments.size(); ++i) {
         if (assignments[i] == UNASSIGNED) {
-            return i << 1;
+            if (var_activities[i] > max_activity) {
+                max_activity = var_activities[i];
+                max_index = i;
+            }
         }
     }
+    return max_index << 1;
 }
 
 void Solver::print_clauses() {
@@ -290,4 +305,13 @@ long Solver::index_of_highest_decision_level(Clause &clause) {
             { return (decision_levels[var_index(a)] < decision_levels[var_index(b)]); };
     auto result = std::ranges::max_element(clause.literals, level_compare);
     return std::ranges::distance(clause.literals.begin(), result);
+}
+
+void Solver::bumpVariable(Variable_t var) {
+    var_activities[var] += 1;
+}
+
+void Solver::decayActivities() {
+    //for (auto &activity: var_activities)
+    std::ranges::for_each(var_activities, [](double &d) { d *= 0.95;});
 }
