@@ -5,21 +5,25 @@
 #include <iostream>
 #include <functional>
 #include <cassert>
+#include <algorithm>
 #include "solver.h"
 #include "clause.h"
 #include "encoding_util.h"
 
 
-void Solver::addClause(const std::vector<Literal_t> &clause, bool learnt) {
-    if (clause.empty()) {
+void Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
+    if (literals.empty()) {
         std::cout << "WARNING: Tried to add empty clause" << std::endl;
-    } else if (clause.size() == 1) {
+    } else if (literals.size() == 1) {
         // Does not use return value: Breaks if input has two conflicting unit assignments
-        enqueue(clause.back());
+        enqueue(literals.back());
     } else {
+        // allocate clause
+        auto clause = std::make_shared<Clause>(literals, learnt);
         // select vector to append to
         auto &clause_vector = learnt ? learnt_clauses : clauses;
-        clause_vector.emplace_back(std::make_shared<Clause>(clause, learnt));
+        clause_vector.push_back(clause);
+
         // Set BaseAddress for debugging purposes
         /*if (clauses.size() == 1) {
             ClauseRef::setClausesBaseAddress(&clauses[0]);
@@ -27,9 +31,15 @@ void Solver::addClause(const std::vector<Literal_t> &clause, bool learnt) {
         if (learnt_clauses.size() == 1) {
             ClauseRef::setLearntClausesBaseAddress(&learnt_clauses[0]);
         }*/
+        if (learnt) {
+            // pick second watch literal with the highest decision level
+            auto i = index_of_highest_decision_level(*clause);
+            clause->literals[1] = clause->literals[i];
+            clause->literals[i] = literals[1];
+        }
         // Add clause to the watchlist of the negation of the two first elements
-        watch_lists[negate_literal(clause[0])].emplace_back(clause_vector.back());
-        watch_lists[negate_literal(clause[1])].emplace_back(clause_vector.back());
+        watch_lists[negate_literal(clause->literals[0])].emplace_back(clause);
+        watch_lists[negate_literal(clause->literals[1])].emplace_back(clause);
 
     }
 }
@@ -273,4 +283,11 @@ void Solver::print_clauses() {
             std::cout << *clause << std::endl;
         }
     }
+}
+
+long Solver::index_of_highest_decision_level(Clause &clause) {
+    auto level_compare = [this](Literal_t a, Literal_t b)
+            { return (decision_levels[var_index(a)] < decision_levels[var_index(b)]); };
+    auto result = std::ranges::max_element(clause.literals, level_compare);
+    return std::ranges::distance(clause.literals.begin(), result);
 }

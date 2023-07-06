@@ -59,7 +59,7 @@ public:
     lbool value(Literal_t);
 public:
     void analyse_conflict(std::shared_ptr<Clause> conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level);
-    void addClause(const std::vector<Literal_t> &clause, bool learnt);
+    void addClause(const std::vector<Literal_t> &literals, bool learnt);
 
     /**
      *
@@ -90,6 +90,8 @@ public:
 
     void print_clauses();
     friend class VariableOrder;
+
+    long index_of_highest_decision_level(Clause &clause);
 };
 
 #endif //SAT_SOLVER_SOLVER_H
