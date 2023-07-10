@@ -57,4 +57,6 @@ std::string output_dimacs(std::vector<bool>);
 
 std::vector<bool> bitset_to_vector(std::bitset<64> bitset);
 
+void output_model_to_file(const std::vector<lbool>& assignments, const std::string& input_file_name);
+
 #endif //SAT_SOLVER_IO_UTILS_H

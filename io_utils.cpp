@@ -1,4 +1,5 @@
 #include "io_utils.h"
+#include <fstream>
 
 std::string output_dimacs(std::vector<bool> assignment) {
     int n = assignment.size();
@@ -29,4 +30,26 @@ void import_from_file(std::string filename, Solver &solver) {
     if (parse_cnf_result == lorina::return_code::parse_error) {
         throw std::runtime_error("Lorina parse error, when trying to parse " + filename);
     }
+}
+
+void output_model_to_file(const std::vector<lbool>& assignments, const std::string& input_file_name) {
+    std::ofstream output_file;
+    std::string output_file_name = input_file_name + ".sol";
+    output_file.open(output_file_name);
+    int number_of_variables = assignments.size();
+    if (output_file.is_open()) {
+        output_file << "p sat" << number_of_variables << " " << number_of_variables << std::endl;
+        for (int i = 1; i <= number_of_variables; ++i) {
+            if (assignments[i-1] == TRUE) {
+                output_file << i << std::endl;
+            } else if (assignments[i-1] == FALSE) {
+                output_file << -i << std::endl;
+            } else {
+                std::cerr << "Tried to export incomplete model";
+            }
+        }
+    } else {
+        std::cerr << "Could not open file" << std::endl;
+    }
+    output_file.close();
 }
