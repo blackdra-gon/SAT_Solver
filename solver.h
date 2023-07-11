@@ -60,6 +60,9 @@ public:
     // To be replaced with VariableOrder
     Literal_t next_unassigned_variable();
 
+    // Clause activities
+    void bumpClause(const std::shared_ptr<Clause>& clause);
+
     lbool value(Literal_t);
 public:
     void analyse_conflict(std::shared_ptr<Clause> conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level);
@@ -96,6 +99,8 @@ public:
     friend class VariableOrder;
 
     long index_of_highest_decision_level(Clause &clause);
+
+    void reduce_learnt_clauses();
 };
 
 #endif //SAT_SOLVER_SOLVER_H

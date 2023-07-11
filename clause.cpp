@@ -57,5 +57,15 @@ void Clause::calc_reason(Solver &s, std::optional<Literal_t> l, std::vector<Lite
     for (; i < literals.size(); ++i) {
         out_reason.push_back(negate_literal(literals[i]));
     }
-    // Bump clause activity for learnt clauses
+    if (learnt) {
+        s.bumpClause(shared_from_this());
+    }
+}
+
+bool Clause::locked(Solver &s) {
+    auto reason_for_first_literal = s.antecedent_clauses[var_index(literals[0])];
+    if (reason_for_first_literal.has_value()) {
+        return reason_for_first_literal.value().lock() == shared_from_this();
+    }
+    return false;
 }

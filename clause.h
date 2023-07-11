@@ -17,10 +17,19 @@ class Solver;
 
 class Clause : public std::enable_shared_from_this<Clause>{
 public:
-    explicit Clause(std::vector<Literal_t> literals, bool learnt= false): literals(std::move(literals)), learnt(learnt) {}
+    explicit Clause(std::vector<Literal_t> literals, bool learnt= false): literals(std::move(literals)), learnt(learnt) {
+        activity = 1;
+    }
 
     std::vector<Literal_t> literals;
     bool learnt;
+    double activity;
+    /**
+     * only for learnt clauses: return if clause is reason for a current assignment (and therefore should not be deleted)
+     * @param other
+     * @return
+     */
+    bool locked(Solver &s);
 
     bool operator==(const Clause& other) const;
     bool operator==(const ClauseRef& other) const;

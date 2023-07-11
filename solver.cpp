@@ -242,6 +242,8 @@ bool Solver::solve() {
 }
 
 lbool Solver::search() {
+    // TODO: adjust limit at restart
+    uint32_t numberOfLearntClauses = assignments.size()*10;
     while (true) {
         auto conflicting_clause = propagate();
         if (conflicting_clause) {
@@ -264,12 +266,16 @@ lbool Solver::search() {
                 // All variables are assigned
                 std::cout << "Satisfying assignment found: " << trail << std::endl;
                 return TRUE;
-            } else {
-                // Take new assumption
-                Literal_t next_assumption = next_unassigned_variable();
-                std::cout << "LEVEL " << current_decision_level() + 1 << ": Assuming " << dimacs_format(next_assumption) << std::endl;
-                assume(next_assumption);
             }
+            // learnt clauses reach capacity
+            if (learnt_clauses.size() >= numberOfLearntClauses) {
+                reduce_learnt_clauses();
+            }
+            // Take new assumption
+            Literal_t next_assumption = next_unassigned_variable();
+            std::cout << "LEVEL " << current_decision_level() + 1 << ": Assuming " << dimacs_format(next_assumption) << std::endl;
+            assume(next_assumption);
+
         }
     }
 }
@@ -314,4 +320,24 @@ void Solver::bumpVariable(Variable_t var) {
 void Solver::decayActivities() {
     //for (auto &activity: var_activities)
     std::ranges::for_each(var_activities, [](double &d) { d *= 0.95;});
+    for (auto clause: learnt_clauses) {
+        clause->activity *= 0.999;
+    }
+}
+
+void Solver::bumpClause(const std::shared_ptr<Clause>& clause) {
+    clause->activity += 1;
+}
+
+void Solver::reduce_learnt_clauses() {
+    std::cout << "Reduce set of learnt Clauses" << std::endl;
+    std::ranges::sort(learnt_clauses, [](const std::shared_ptr<Clause>& a, const std::shared_ptr<Clause>& b) {
+        return a->activity >= b->activity;
+    });
+    int middle = learnt_clauses.size() / 2;
+    auto half_learnt_clause = std::next(learnt_clauses.begin(), middle);
+    auto result = std::remove_if(half_learnt_clause, learnt_clauses.end(), [this](const std::shared_ptr<Clause>& c) {
+        return !c->locked(*this);
+    });
+    learnt_clauses.erase(result, learnt_clauses.end());
 }
