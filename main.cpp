@@ -30,7 +30,6 @@ int main(int argc, char** argv) {
         }
 
     }
-    s.print_clauses();
     if (s.solve()) {
         std::cout << "SATISFIABLE" << std::endl;
         if (!input_file.empty()) {

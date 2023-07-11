@@ -104,7 +104,7 @@ void Solver::setNumberOfVariables(int number) {
 std::optional<std::shared_ptr<Clause>> Solver::propagate() {
     while (!propagation_queue.empty()) {
         Literal_t literal = propagation_queue.front();
-        std::cout << "LEVEL " << current_decision_level() << ": Propagating " << dimacs_format(literal) << std::endl;
+        // std::cout << "LEVEL " << current_decision_level() << ": Propagating " << dimacs_format(literal) << std::endl;
         propagation_queue.pop();
         auto tmp_watchlist = watch_lists[literal];
         watch_lists[literal].clear();
@@ -248,16 +248,16 @@ lbool Solver::search() {
         auto conflicting_clause = propagate();
         if (conflicting_clause) {
             // Conflict handling
-            std::cout << "Conflict in " << *conflicting_clause.value() << std::endl;
+            // std::cout << "Conflict in " << *conflicting_clause.value() << std::endl;
             if (current_decision_level() == 0) {
                 return FALSE;
             }
             std::vector<Literal_t> learnt_clause;
             int backtrack_level = 0;
             analyse_conflict(conflicting_clause.value(), learnt_clause, backtrack_level);
-            std::cout << "Backtrack to level " << backtrack_level << std::endl;
+            // std::cout << "Backtrack to level " << backtrack_level << std::endl;
             backtrack_until(backtrack_level);
-            std::cout << "Learnt clause: " << learnt_clause << std::endl;
+            // std::cout << "Learnt clause: " << learnt_clause << std::endl;
             record_learnt_clause(learnt_clause);
             decayActivities();
         } else {
@@ -273,7 +273,7 @@ lbool Solver::search() {
             }
             // Take new assumption
             Literal_t next_assumption = next_unassigned_variable();
-            std::cout << "LEVEL " << current_decision_level() + 1 << ": Assuming " << dimacs_format(next_assumption) << std::endl;
+            // std::cout << "LEVEL " << current_decision_level() + 1 << ": Assuming " << dimacs_format(next_assumption) << std::endl;
             assume(next_assumption);
 
         }
@@ -330,7 +330,7 @@ void Solver::bumpClause(const std::shared_ptr<Clause>& clause) {
 }
 
 void Solver::reduce_learnt_clauses() {
-    std::cout << "Reduce set of learnt Clauses" << std::endl;
+    // std::cout << "Reduce set of learnt Clauses" << std::endl;
     std::ranges::sort(learnt_clauses, [](const std::shared_ptr<Clause>& a, const std::shared_ptr<Clause>& b) {
         return a->activity >= b->activity;
     });

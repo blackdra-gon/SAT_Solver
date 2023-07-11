@@ -33,7 +33,7 @@ bool Clause::propagate(Solver& s, Literal_t l) {
         }
     }
     // Clause is unit now
-    std::cout << "Literal " << dimacs_format(literals[0]) << " is unit now in " << *this << std::endl;
+    // std::cout << "Literal " << dimacs_format(literals[0]) << " is unit now in " << *this << std::endl;
     s.watch_lists[l].emplace_back(weak_from_this());
     return s.enqueue(literals[0], shared_from_this());
 }
