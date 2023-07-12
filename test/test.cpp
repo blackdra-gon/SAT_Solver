@@ -233,6 +233,6 @@ TEST_CASE("Search routine") {
     Solver s;
     s.setNumberOfVariables(10);
     s.addClauses({{-1,-2,-3,-4}, {-1,-2,-3,4}, {5,6}, {7,8}, {9,10}});
-    CHECK(s.search() == TRUE);
+    CHECK(s.search(100, 10) == TRUE);
 
 }

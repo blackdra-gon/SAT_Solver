@@ -235,19 +235,23 @@ void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
 
 bool Solver::solve() {
     lbool status = UNASSIGNED;
+    double number_of_conflicts_until_restart = 100;
+    double max_learnt_clauses = assignments.size() / 3;
     while (status == UNASSIGNED) {
-        status = search();
+        status = search(int(number_of_conflicts_until_restart), int(max_learnt_clauses));
+        number_of_conflicts_until_restart *= 1.5;
+        max_learnt_clauses *= 1.1;
     }
     return status == TRUE;
 }
 
-lbool Solver::search() {
-    // TODO: adjust limit at restart
-    uint32_t numberOfLearntClauses = assignments.size()*10;
+lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_clauses) {
+    int conflict_counter = 0;
     while (true) {
         auto conflicting_clause = propagate();
         if (conflicting_clause) {
             // Conflict handling
+            ++conflict_counter;
             // std::cout << "Conflict in " << *conflicting_clause.value() << std::endl;
             if (current_decision_level() == 0) {
                 return FALSE;
@@ -268,8 +272,12 @@ lbool Solver::search() {
                 return TRUE;
             }
             // learnt clauses reach capacity
-            if (learnt_clauses.size() >= numberOfLearntClauses) {
+            if (learnt_clauses.size() >= maximum_learnt_clauses) {
                 reduce_learnt_clauses();
+            }
+            if (conflict_counter >= number_of_conflicts) {
+                backtrack_until(0);
+                return UNASSIGNED;
             }
             // Take new assumption
             Literal_t next_assumption = next_unassigned_variable();

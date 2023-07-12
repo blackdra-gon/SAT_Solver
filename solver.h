@@ -30,7 +30,7 @@ public:
      * is called internaly by solve() to look for a solution. Might return UNASSIGNED, when restarts are implemented
      * @return
      */
-    lbool search();
+    lbool search(uint32_t number_of_conflicts, uint32_t maximum_learnt_clauses);
 
 
     std::vector<std::shared_ptr<Clause>> clauses;
