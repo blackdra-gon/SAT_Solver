@@ -7,7 +7,7 @@ def execute_program_p(filename):
     start_time = time.time()
     print("start solving " + filename)
     try:
-        completed_process = subprocess.run(command, timeout=600, capture_output=True)
+        completed_process = subprocess.run(command, timeout=600)
         duration = time.time() - start_time
         print("completed solving " + filename + ". This took " + str(duration) + 's')
     except subprocess.TimeoutExpired:
@@ -15,7 +15,7 @@ def execute_program_p(filename):
 
 def execute_program_for_files(folder_path):
     # Iterate over files in the given folder
-    for filename in os.listdir(folder_path):
+    for filename in reversed(os.listdir(folder_path)):
         # Exclude directories
         if os.path.isfile(os.path.join(folder_path, filename)):
             file_path = os.path.join(folder_path, filename)

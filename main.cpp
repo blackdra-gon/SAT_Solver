@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
         }
 
     }
+    std::cout << "succesfully imported instance" << std::endl;
+    //s.print_clauses();
     if (s.solve()) {
         std::cout << "SATISFIABLE" << std::endl;
         if (!input_file.empty()) {

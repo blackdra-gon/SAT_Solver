@@ -26,9 +26,61 @@ std::vector<bool> bitset_to_vector(std::bitset<64> bitset) {
 }
 
 void import_from_file(std::string filename, Solver &solver) {
-    auto parse_cnf_result = lorina::read_dimacs(filename, Reader(solver));
-    if (parse_cnf_result == lorina::return_code::parse_error) {
-        throw std::runtime_error("Lorina parse error, when trying to parse " + filename);
+    std::ifstream in( filename, std::ifstream::in );
+    if ( !in.is_open() )
+    {
+        std::cout << "Error: Could not open file" << std::endl;
+    }
+    uint number_of_variables;
+    uint number_of_clauses;
+    std::string line;
+    std::string literal_str;
+    // Reading first line, ignoring comments
+    do {
+        std::getline(in, line);
+    } while (line[0] == 'c');
+
+    int i = 0;
+    std::stringstream stringStream(line);
+    while (std::getline(stringStream, literal_str, ' ')) {
+        switch (i) {
+            case 0:
+                if (literal_str != "p") {
+                    std::cout << "parsing error" << std::endl;
+                }
+                break;
+            case 1:
+                if (literal_str != "cnf") {
+                    std::cout << "parsing error" << std::endl;
+                }
+                break;
+            case 2:
+                number_of_variables = std::stoi(literal_str);
+                solver.setNumberOfVariables(number_of_variables);
+                break;
+            case 3:
+                number_of_clauses = std::stoi(literal_str);
+                solver.clauses.reserve(number_of_clauses);
+                solver.learnt_clauses.reserve(number_of_clauses*2);
+                break;
+            default:
+                std::cout << "parsing error" << std::endl;
+                break;
+
+        }
+        ++i;
+    }
+    while (std::getline(in, line)) {
+        std::stringstream stringStream(line);
+        std::vector<Literal_t> clause;
+        while (std::getline(stringStream, literal_str, ' ')) {
+            int literal = std::stoi(literal_str);
+            if (literal != 0) {
+                clause.push_back(internal_representation(literal));
+            }
+        }
+        solver.addClause(clause);
+
     }
 }
 
@@ -38,7 +90,7 @@ void output_model_to_file(const std::vector<lbool>& assignments, const std::stri
     output_file.open(output_file_name);
     int number_of_variables = assignments.size();
     if (output_file.is_open()) {
-        output_file << "p sat" << number_of_variables << " " << number_of_variables << std::endl;
+        output_file << "p sat " << number_of_variables << " " << number_of_variables << std::endl;
         for (int i = 1; i <= number_of_variables; ++i) {
             if (assignments[i-1] == TRUE) {
                 output_file << i << std::endl;
