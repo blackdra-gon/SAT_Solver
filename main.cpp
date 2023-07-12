@@ -1,11 +1,6 @@
 #include <iostream>
 
-#include "lorina_include/lorina/dimacs.hpp"
-
 #include "io_utils.h"
-#include "solver_structs.h"
-#include "encoding_util.h"
-#include "dpll.h"
 
 
 int main(int argc, char** argv) {
@@ -23,11 +18,8 @@ int main(int argc, char** argv) {
 
     // Get input from stdin
     } else {
-        auto parse_cnf_result = lorina::read_dimacs(std::cin, Reader(s));
-        if (parse_cnf_result == lorina::return_code::parse_error) {
-            std::cerr << "Lorina parse error, when trying to parse from stdin" << std::endl;
-            return 1;
-        }
+        std::cout << "Input form stdin is not implemented" << std::endl;
+        return 1;
 
     }
     std::cout << "succesfully imported instance" << std::endl;
