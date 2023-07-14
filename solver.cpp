@@ -340,7 +340,7 @@ void Solver::bumpClause(const std::shared_ptr<Clause>& clause) {
 void Solver::reduce_learnt_clauses() {
     // std::cout << "Reduce set of learnt Clauses" << std::endl;
     std::ranges::sort(learnt_clauses, [](const std::shared_ptr<Clause>& a, const std::shared_ptr<Clause>& b) {
-        return a->activity >= b->activity;
+        return a->activity > b->activity;
     });
     int middle = learnt_clauses.size() / 2;
     auto half_learnt_clause = std::next(learnt_clauses.begin(), middle);
