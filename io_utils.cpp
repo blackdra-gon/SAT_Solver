@@ -3,11 +3,12 @@
 #include <iostream>
 #include <sstream>
 
-void import_from_file(std::string filename, Solver &solver) {
+bool import_from_file(std::string filename, Solver &solver) {
     std::ifstream in( filename, std::ifstream::in );
     if ( !in.is_open() )
     {
         std::cout << "Error: Could not open file" << std::endl;
+        throw std::runtime_error("Could not open file");
     }
     uint number_of_variables;
     uint number_of_clauses;
@@ -60,6 +61,7 @@ void import_from_file(std::string filename, Solver &solver) {
         solver.addClause(clause);
 
     }
+    return true;
 }
 
 void output_model_to_file(const std::vector<lbool>& assignments, const std::string& input_file_name) {

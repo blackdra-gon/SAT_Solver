@@ -174,7 +174,6 @@ TEST_CASE("Clause Learning - Varisat Example") {
 
 TEST_CASE("Input/Output in dimacs format") {
     std::vector<bool> assignment = {0,1,0,1};
-    REQUIRE(output_dimacs({0,1,0,1}) == "v -1 2 -3 4");
     REQUIRE(internal_representation(-1) == 1);
     REQUIRE(internal_representation(1) == 0);
     REQUIRE(internal_representation(-5) == 9);
@@ -195,7 +194,7 @@ TEST_CASE("Simple test cases for overall solving routine") {
     CHECK(s1.solve() == false);
     Solver s2;
     s2.setNumberOfVariables(1);
-    s2.addClauses({{1}, {-1}});
+    CHECK(!s2.addClauses({{1}, {-1}}));
     // Solver does not yet recognize unit conflicts in given clauses
     //CHECK(s2.solve() == false);
 

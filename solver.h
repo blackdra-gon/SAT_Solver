@@ -66,13 +66,20 @@ public:
     lbool value(Literal_t);
 public:
     void analyse_conflict(std::shared_ptr<Clause> conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level);
-    void addClause(const std::vector<Literal_t> &literals, bool learnt=false);
+    /**
+     *
+     * @param literals
+     * @param learnt
+     * @return true on success, false if an added unit clause causes a conflict
+     */
+    bool addClause(const std::vector<Literal_t> &literals, bool learnt= false);
 
     /**
      *
      * @param clauses in dimacs representation
+     * @return true on success, false when an added unit clause causes a conflict
      */
-    void addClauses(const std::vector<std::vector<int>>& clauses);
+    bool addClauses(const std::vector<std::vector<int>>& clauses);
     void setNumberOfVariables(int number);
     /**
      * Add a unit constraint to the propagation queue and also add the respective assignment

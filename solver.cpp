@@ -11,12 +11,14 @@
 #include "encoding_util.h"
 
 
-void Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
+bool Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
     if (literals.empty()) {
         std::cout << "WARNING: Tried to add empty clause" << std::endl;
     } else if (literals.size() == 1) {
-        // Does not use return value: Breaks if input has two conflicting unit assignments
-        enqueue(literals.back());
+        // returns false on a conflicting unit clause
+        if (!enqueue(literals.back())) {
+            return false;
+        }
     } else {
         // allocate clause
         auto clause = std::make_shared<Clause>(literals, learnt);
@@ -47,6 +49,7 @@ void Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
         watch_lists[negate_literal(clause->literals[1])].emplace_back(clause);
 
     }
+    return true;
 }
 
 bool Solver::enqueue(Literal_t literal, const std::optional<std::shared_ptr<Clause>>& reason) {
@@ -129,15 +132,18 @@ std::optional<std::shared_ptr<Clause>> Solver::propagate() {
     return std::nullopt;
 }
 /**
- * Should only be called once for every solver object, otherwise not enough space is reserved
+ * Should only be called once for every solver object. Used only for testing.
  * @param clauses
  */
-void Solver::addClauses(const std::vector<std::vector<int>>& input_clauses) {
+bool Solver::addClauses(const std::vector<std::vector<int>>& clauses) {
     //clauses.reserve(input_clauses.size());
-    learnt_clauses.reserve(input_clauses.size()*10);
-    for (const auto& literal_list: input_clauses) {
-        addClause(internal_representation(literal_list), false);
+    learnt_clauses.reserve(clauses.size() * 10);
+    for (const auto& literal_list: clauses) {
+        if (!addClause(internal_representation(literal_list), false)) {
+            return false;
+        }
     }
+    return true;
 }
 
 int Solver::current_decision_level() const {
@@ -268,7 +274,7 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
             // No conflict
             if (trail.size() == assignments.size()) {
                 // All variables are assigned
-                std::cout << "Satisfying assignment found: " << trail << std::endl;
+                // std::cout << "Satisfying assignment found: " << trail << std::endl;
                 return TRUE;
             }
             // learnt clauses reach capacity
