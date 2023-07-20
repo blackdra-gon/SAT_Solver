@@ -28,7 +28,7 @@ void import_from_file(std::string filename, Solver &solver) {
                 }
                 break;
             case 1:
-                if (literal_str != "cnf") {
+                if (literal_str != "cnf" && literal_str != "sat" ) {
                     std::cout << "parsing error" << std::endl;
                 }
                 break;
