@@ -63,7 +63,7 @@ public:
     // Clause activities
     void bumpClause(const std::shared_ptr<Clause>& clause);
 
-    lbool value(Literal_t);
+    lbool value(Literal_t l) const;
 public:
     void analyse_conflict(std::shared_ptr<Clause> conflicting_clause, std::vector<Literal_t> &out_learnt, int& out_bt_level);
     /**
@@ -108,6 +108,12 @@ public:
     long index_of_highest_decision_level(Clause &clause);
 
     void reduce_learnt_clauses();
+    /**
+     * performs unitpropagation, then deletes satisfied clauses und false literals
+     * should only be called before solving
+     * @return true on success, false if a conflict occurred
+     */
+    bool preprocess();
 };
 
 #endif //SAT_SOLVER_SOLVER_H

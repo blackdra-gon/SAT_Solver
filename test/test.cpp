@@ -200,26 +200,18 @@ TEST_CASE("Simple test cases for overall solving routine") {
 
 }
 
+TEST_CASE("Simple Preprocessing") {
+    Solver s1;
+    s1.setNumberOfVariables(3);
+    s1.addClauses({{1, -3}, {-3, 2}, {-2,-3,-1}, {3}});
+    CHECK(s1.preprocess() == false);
+    Solver s2;
+    s2.setNumberOfVariables(3);
+    s2.addClauses({{1,2}, {1,-3}, {-3,2}, {-2,3,-1}, {-3}});
+    CHECK(s2.preprocess());
+    check_clauses(s2, {{1,2}, {-2,-1}});
 
-/*TEST_CASE("Apply Unit Propagation") {
-    Cnf cnf_1 = import_from_file("../../example_dimacs/unit_propagation_test_1.cnf");
-    apply_unit_propagation(cnf_1);
-    CHECK(cnf_1.clauses.empty());
-    Assignments expected_assignments = from_dimacs_list( {-1, -2, -3});
-    CHECK(cnf_1.assignments == expected_assignments);
-    Cnf cnf_2_before = import_from_file("../../example_dimacs/unit_propagation_test_2_before.cnf");
-    Cnf cnf_2_after = import_from_file("../../example_dimacs/unit_propagation_test_2_after.cnf");
-    apply_unit_propagation(cnf_2_before);
-    CHECK(cnf_2_after == cnf_2_before);
-    Assignments expected_assignments_2 = from_dimacs_list( {1});
-    CHECK(cnf_2_before.assignments == expected_assignments_2);
-    // Unittest for detecting conflicts
-    Cnf conflict = import_from_file("../../example_dimacs/unit_propagation_test_simple_conflict.cnf");
-    CHECK(!apply_unit_propagation(conflict));
-    // function applied to empty clause list
-    Cnf cnf_empty;
-    CHECK(apply_unit_propagation(cnf_empty));
-}*/
+}
 
 TEST_CASE("Negate Literal") {
     REQUIRE(negate_literal(0) == 1);

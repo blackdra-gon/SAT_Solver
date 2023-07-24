@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <algorithm>
 #include "clause.h"
 #include "solver.h"
 #include "encoding_util.h"
@@ -67,5 +68,14 @@ bool Clause::locked(Solver &s) {
     if (reason_for_first_literal.has_value()) {
         return reason_for_first_literal.value().lock() == shared_from_this();
     }
+    return false;
+}
+
+bool Clause::simplify(Solver &s) {
+    if (std::ranges::any_of(literals, [s](Literal_t literal) { return s.value(literal) == TRUE;})) {
+        return true;
+    }
+    auto erased_literals = std::erase_if(literals, [s](Literal_t literal) { return s.value(literal) == FALSE;} );
+    //std::cout << "Erased " << erased_literals << " literals during preprocessing" << std::endl;
     return false;
 }

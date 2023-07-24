@@ -74,7 +74,7 @@ bool Solver::enqueue(Literal_t literal, const std::optional<std::shared_ptr<Clau
     }
 }
 
-lbool Solver::value(Literal_t l) {
+lbool Solver::value(Literal_t l) const {
     if (sign(l)) {
         return assignments[var_index(l)];
     } else {
@@ -354,4 +354,16 @@ void Solver::reduce_learnt_clauses() {
         return !c->locked(*this);
     });
     learnt_clauses.erase(result, learnt_clauses.end());
+}
+
+bool Solver::preprocess() {
+    if (!propagation_queue.empty()) {
+        if (propagate() != std::nullopt) {
+            return false;
+        }
+        auto erased_clauses = std::erase_if(clauses, [this](auto clause) { return clause->simplify(*this); });
+        std::cout << "Erased " << erased_clauses << " clauses during preprocessing" << std::endl;
+    }
+    std::cout << "finished preprocessing" << std::endl;
+    return true;
 }

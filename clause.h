@@ -53,6 +53,11 @@ public:
     void calc_reason(Solver& s, std::optional<Literal_t> l, std::vector<Literal_t> &out_reason);
 
     friend std::ostream& operator<<(std::ostream& os, const Clause& output);
+    /**
+     * Is called only as part of preprocessing. Deletes false literals
+     * @return true, if a literal in the clause is already true, therefore the clause can be deleted
+     */
+    bool simplify(Solver &s);
 };
 
 
