@@ -72,24 +72,6 @@ bool Clause::locked(Solver &s) {
 }
 
 bool Clause::simplify(Solver &s) {
-    if (std::ranges::any_of(literals, [s](Literal_t literal) { return s.value(literal) == TRUE;})) {
-        return true;
-    }
-    auto erased_literals = std::erase_if(literals, [s](Literal_t literal) { return s.value(literal) == FALSE;} );
-    //std::cout << "Erased " << erased_literals << " literals during preprocessing" << std::endl;
-    return false;
-}
-
-bool Clause::satisfied(const Solver &s) {
-    return std::ranges::any_of(literals, [s](Literal_t literal) { return s.value(literal) == TRUE;});
-}
-
-int Clause::remove_false_literals(Solver &s) {
-    auto erased_literals = std::erase_if(literals, [s](Literal_t literal) { return s.value(literal) == FALSE;} );
-    return erased_literals;
-}
-
-bool Clause::simplify_from_paper(Solver &s) {
     int j = 0;
     for (auto literal : literals) {
         if (s.value(literal) == TRUE) {

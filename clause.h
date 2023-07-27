@@ -58,9 +58,6 @@ public:
      * @return true, if a literal in the clause is already true, therefore the clause can be deleted
      */
     bool simplify(Solver &s);
-    bool simplify_from_paper(Solver &s);
-    bool satisfied(const Solver &s);
-    int remove_false_literals(Solver &s);
 };
 
 

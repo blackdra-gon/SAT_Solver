@@ -362,12 +362,7 @@ bool Solver::preprocess() {
         if (propagate() != std::nullopt) {
             return false;
         }
-        auto erased_clauses = std::erase_if(clauses, [this](auto clause) { return clause->simplify_from_paper(*this); });
-        /*int erased_literals = 0;
-        for (const auto& clause: clauses) {
-            erased_literals += clause->remove_false_literals(*this);
-        }
-        std::cout << "Erased " << erased_literals << " literals during preprocessing" << std::endl;*/
+        auto erased_clauses = std::erase_if(clauses, [this](auto clause) { return clause->simplify(*this); });
         std::cout << "Erased " << erased_clauses << " clauses during preprocessing" << std::endl;
     }
     auto stop = std::chrono::steady_clock::now();
