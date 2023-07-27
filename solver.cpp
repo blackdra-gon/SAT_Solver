@@ -6,6 +6,7 @@
 #include <functional>
 #include <cassert>
 #include <algorithm>
+#include <chrono>
 #include "solver.h"
 #include "clause.h"
 #include "encoding_util.h"
@@ -346,7 +347,7 @@ void Solver::reduce_learnt_clauses() {
     std::ranges::sort(learnt_clauses, [](const std::shared_ptr<Clause>& a, const std::shared_ptr<Clause>& b) {
         return a->activity > b->activity;
     });
-    int middle = learnt_clauses.size() / 2;
+    size_t middle = learnt_clauses.size() / 2;
     auto half_learnt_clause = std::next(learnt_clauses.begin(), middle);
     auto result = std::remove_if(half_learnt_clause, learnt_clauses.end(), [this](const std::shared_ptr<Clause>& c) {
         return !c->locked(*this);
@@ -355,14 +356,23 @@ void Solver::reduce_learnt_clauses() {
 }
 
 bool Solver::preprocess() {
-    pure_literal_elimination();
+    auto start = std::chrono::steady_clock::now();
+    //pure_literal_elimination();
     if (!propagation_queue.empty()) {
         if (propagate() != std::nullopt) {
             return false;
         }
-        auto erased_clauses = std::erase_if(clauses, [this](auto clause) { return clause->simplify(*this); });
+        auto erased_clauses = std::erase_if(clauses, [this](auto clause) { return clause->simplify_from_paper(*this); });
+        /*int erased_literals = 0;
+        for (const auto& clause: clauses) {
+            erased_literals += clause->remove_false_literals(*this);
+        }
+        std::cout << "Erased " << erased_literals << " literals during preprocessing" << std::endl;*/
         std::cout << "Erased " << erased_clauses << " clauses during preprocessing" << std::endl;
     }
+    auto stop = std::chrono::steady_clock::now();
+    std::cout << "Preprocessing took " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count()
+            << " milliseconds" << std::endl;
     std::cout << "finished preprocessing" << std::endl;
     return true;
 }

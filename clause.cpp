@@ -79,3 +79,28 @@ bool Clause::simplify(Solver &s) {
     //std::cout << "Erased " << erased_literals << " literals during preprocessing" << std::endl;
     return false;
 }
+
+bool Clause::satisfied(const Solver &s) {
+    return std::ranges::any_of(literals, [s](Literal_t literal) { return s.value(literal) == TRUE;});
+}
+
+int Clause::remove_false_literals(Solver &s) {
+    auto erased_literals = std::erase_if(literals, [s](Literal_t literal) { return s.value(literal) == FALSE;} );
+    return erased_literals;
+}
+
+bool Clause::simplify_from_paper(Solver &s) {
+    int j = 0;
+    for (auto literal : literals) {
+        if (s.value(literal) == TRUE) {
+            //std::cout << dimacs_format(literal) << ": " << *this << std::endl;
+            return true;
+        } else if (s.value(literal) == UNASSIGNED) {
+            literals[j++] = literal;
+        } //else {
+            //std::cout << "erased literal " << dimacs_format(literal) << std::endl;
+        //}
+    }
+    literals.erase(std::next(literals.begin(), j), literals.end());
+    return false;
+}
