@@ -65,9 +65,7 @@ bool Solver::enqueue(Literal_t literal, const std::optional<std::shared_ptr<Clau
             return true;
         }
     } else {
-        assignments[var_index(literal)] = lsign(literal);
-        trail.push_back(literal);
-        decision_levels[var_index(literal)] = current_decision_level();
+        assign(literal);
         antecedent_clauses[var_index(literal)] = reason;
         propagation_queue.push(literal);
         return true;
@@ -357,6 +355,7 @@ void Solver::reduce_learnt_clauses() {
 }
 
 bool Solver::preprocess() {
+    pure_literal_elimination();
     if (!propagation_queue.empty()) {
         if (propagate() != std::nullopt) {
             return false;
@@ -366,4 +365,37 @@ bool Solver::preprocess() {
     }
     std::cout << "finished preprocessing" << std::endl;
     return true;
+}
+
+void Solver::assign(Literal_t lit) {
+    assignments[var_index(lit)] = lsign(lit);
+    trail.push_back(lit);
+    decision_levels[var_index(lit)] = current_decision_level();
+}
+
+void Solver::pure_literal_elimination() {
+    std::vector<bool> literal_ocurrence(watch_lists.size(), false);
+    for (const auto& clause: clauses) {
+        for (auto literal: clause->literals) {
+            literal_ocurrence[literal] = true;
+        }
+    }
+    for (int i = 0; i < literal_ocurrence.size(); ++i) {
+        if (!literal_ocurrence[i]) {
+            if (value(i) == UNASSIGNED) {
+                assign(negate_literal(i));
+            }
+        }
+    }
+    // erase clauses if they contain a true literal
+    auto deleted_clause = std::erase_if(clauses, [this](auto clause) {
+        return contains_true_literal(clause);
+    });
+    std::cout << "Deleted " << deleted_clause << " clauses during pure literal elimination" << std::endl;
+}
+
+bool Solver::contains_true_literal(const std::shared_ptr<Clause>& clause) {
+    return std::ranges::any_of(clause->literals, [this](Literal_t literal) {
+        return value(literal) == TRUE;
+    });
 }

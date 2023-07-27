@@ -45,6 +45,12 @@ public:
     std::vector<lbool> assignments; // variable indexed
     std::vector<Literal_t> trail;
     /**
+     * Assign a value to a variable. To be used during preprocessing. In search, use Solver::enqueue()
+     * @param var
+     * @param value
+     */
+    void assign(Literal_t lit);
+    /**
      * trail_limits[i] contains the number of entries the trail had, before the assume of current_decision_level i + 1 was
      * conducted.
      */
@@ -114,6 +120,13 @@ public:
      * @return true on success, false if a conflict occurred
      */
     bool preprocess();
+    /**
+     * finds literals, whose negated form does not occur in the clause. Thus it can be safely assigned and all clauses
+     * which contain this literal, are deleted, because they will never be useful for unit propagation
+     */
+    void pure_literal_elimination();
+private:
+    bool contains_true_literal(const std::shared_ptr<Clause>& clause);
 };
 
 #endif //SAT_SOLVER_SOLVER_H

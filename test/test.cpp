@@ -213,6 +213,15 @@ TEST_CASE("Simple Preprocessing") {
 
 }
 
+TEST_CASE("Pure Literal Preprocessing") {
+    Solver s;
+    s.setNumberOfVariables(5);
+    s.addClauses({{1,2,4}, {-2,-3}, {-4, 1}});
+    s.pure_literal_elimination();
+    check_clauses(s, {{-2,-3}});
+    check_assignments(s, {TRUE, UNASSIGNED, FALSE, UNASSIGNED, FALSE});
+}
+
 TEST_CASE("Negate Literal") {
     REQUIRE(negate_literal(0) == 1);
     REQUIRE(negate_literal(1) == 0);
