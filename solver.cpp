@@ -7,6 +7,7 @@
 #include <cassert>
 #include <algorithm>
 #include <chrono>
+#include <set>
 #include "solver.h"
 #include "clause.h"
 #include "encoding_util.h"
@@ -403,4 +404,29 @@ bool Solver::contains_true_literal(const std::shared_ptr<Clause>& clause) {
     return std::ranges::any_of(clause->literals, [this](Literal_t literal) {
         return value(literal) == TRUE;
     });
+}
+
+std::vector<std::vector<Literal_t>> Solver::clause_distribution(Variable_t var) {
+    return {};
+}
+
+std::vector<Literal_t> Solver::resolve(const Clause_ptr &a, const Clause_ptr& b, Variable_t var) {
+    std::set<Literal_t> resolvent;
+    Clause_ptr input_clause = a;
+    for (int n = 0; n < 2; ++n) {
+        for (auto literal: input_clause->literals) {
+            if (var_index(literal) == var) {
+                // variables to be eliminated
+                continue;
+            }
+            if (resolvent.contains(negate_literal(literal))) {
+                // resolvent already contains the negated literal: Tautology
+                return {};
+            }
+            resolvent.insert(literal);
+        }
+        input_clause = b;
+    }
+    std::vector<Literal_t> literals = {resolvent.begin(), resolvent.end()};
+    return literals;
 }

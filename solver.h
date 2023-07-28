@@ -17,6 +17,9 @@
 
 using Watchlists = std::vector<std::vector<std::reference_wrapper<Clause>>>;
 
+using Clause_ptr = std::shared_ptr<Clause>;
+using Clause_wptr = std::weak_ptr<Clause>;
+
 
 class Solver {
 public:
@@ -27,7 +30,7 @@ public:
     bool solve();
 
     /**
-     * is called internaly by solve() to look for a solution. Might return UNASSIGNED, when restarts are implemented
+     * is called internally by solve() to look for a solution. Might return UNASSIGNED, when restarts are implemented
      * @return
      */
     lbool search(uint32_t number_of_conflicts, uint32_t maximum_learnt_clauses);
@@ -37,6 +40,7 @@ public:
     std::vector<std::shared_ptr<Clause>> learnt_clauses;
     std::queue<Literal_t> propagation_queue;
     std::vector<std::vector<std::weak_ptr<Clause>>> watch_lists; // literal indexed
+    std::vector<std::vector<Clause_ptr>> occurence_lists; // literal indexed, for preprocessing only, should be deleted before search
 
 
 
@@ -125,6 +129,15 @@ public:
      * which contain this literal, are deleted, because they will never be useful for unit propagation
      */
     void pure_literal_elimination();
+    std::vector<std::vector<Literal_t>> clause_distribution(Variable_t var);
+    /**
+     * @pre no unit literals in clauses. Otherwise it would be possible to derive the empty clause in this step
+     * @param a contains a literal var
+     * @param b contains a literal not(var) (or the other way round)
+     * @param var variable which will be resolved away
+     * @return Vector of literals. If the vector is empty, the resolvent was a tautology
+     */
+    std::vector<Literal_t> resolve(const Clause_ptr &a, const Clause_ptr& b, Variable_t var);
 private:
     bool contains_true_literal(const std::shared_ptr<Clause>& clause);
 };

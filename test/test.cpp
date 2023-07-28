@@ -222,6 +222,24 @@ TEST_CASE("Pure Literal Preprocessing") {
     check_assignments(s, {TRUE, UNASSIGNED, FALSE, UNASSIGNED, FALSE});
 }
 
+TEST_CASE("Clause Distribution") {
+    Solver s;
+    s.setNumberOfVariables(4);
+    s.addClauses({{1,2}, {3,2}, {-1,4,2}, {3,-2}, {3,4}});
+    auto expected = internal_representation({{1,3}, {3,-1,4}, {3}});
+    CHECK(expected == s.clause_distribution(var_index(internal_representation(2))));
+}
+
+TEST_CASE("Resolution") {
+    Solver s;
+    s.setNumberOfVariables(7);
+    s.addClauses({{5, -7}, {7, 5}, {1,3,4}, {2,-1,5}, {6, 1, -3, 5}, {-1,2,4,-6}});
+    CHECK(s.resolve(s.clauses[0], s.clauses[1], var_index(internal_representation(7))).front() == internal_representation(5));
+    std::vector<Literal_t> expected(internal_representation({2,3,4,5}));
+    CHECK((s.resolve(s.clauses[2], s.clauses[3], var_index(internal_representation(1)))) == expected);
+    CHECK(s.resolve(s.clauses[4], s.clauses[3], var_index(internal_representation(6))).empty());
+}
+
 TEST_CASE("Negate Literal") {
     REQUIRE(negate_literal(0) == 1);
     REQUIRE(negate_literal(1) == 0);
