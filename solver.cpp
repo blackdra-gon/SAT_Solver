@@ -43,7 +43,11 @@ bool Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
             // Bumping
             for (auto literal: literals) {
                 bumpVariable(var_index(literal));
-                // TODO Bump Clause
+            }
+        } else {
+            // Add clause to occurencelists for preprocessing
+            for (auto literal: clause->literals) {
+                occurrence_lists[literal].emplace_back(clause);
             }
         }
         // Add clause to the watchlist of the negation of the two first elements
@@ -429,4 +433,10 @@ std::vector<Literal_t> Solver::resolve(const Clause_ptr &a, const Clause_ptr& b,
     }
     std::vector<Literal_t> literals = {resolvent.begin(), resolvent.end()};
     return literals;
+}
+
+void Solver::delete_occurrence_lists() {
+    for (auto list: occurrence_lists) {
+        occurrence_lists.clear();
+    }
 }

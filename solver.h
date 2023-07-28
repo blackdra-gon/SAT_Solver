@@ -40,7 +40,7 @@ public:
     std::vector<std::shared_ptr<Clause>> learnt_clauses;
     std::queue<Literal_t> propagation_queue;
     std::vector<std::vector<std::weak_ptr<Clause>>> watch_lists; // literal indexed
-    std::vector<std::vector<Clause_ptr>> occurence_lists; // literal indexed, for preprocessing only, should be deleted before search
+    std::vector<std::vector<Clause_ptr>> occurrence_lists; // literal indexed, for preprocessing only, should be deleted before search
 
 
 
@@ -138,6 +138,7 @@ public:
      * @return Vector of literals. If the vector is empty, the resolvent was a tautology
      */
     std::vector<Literal_t> resolve(const Clause_ptr &a, const Clause_ptr& b, Variable_t var);
+    void delete_occurrence_lists();
 private:
     bool contains_true_literal(const std::shared_ptr<Clause>& clause);
 };

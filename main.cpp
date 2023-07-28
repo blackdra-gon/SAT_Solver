@@ -24,11 +24,12 @@ int main(int argc, char** argv) {
         return 1;
 
     }
-    std::cout << "succesfully imported instance" << std::endl;
+    std::cout << "successfully imported instance" << std::endl;
     if (trivial_conflict || !s.preprocess()) {
         std::cout << "UNSATISFIABLE" << std::endl;
         return 0;
     }
+    s.delete_occurrence_lists();
     //s.print_clauses();
     if (s.solve()) {
         std::cout << "SATISFIABLE" << std::endl;
