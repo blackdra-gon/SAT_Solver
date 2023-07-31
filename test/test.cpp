@@ -223,11 +223,28 @@ TEST_CASE("Pure Literal Preprocessing") {
 }
 
 TEST_CASE("Clause Distribution") {
+    // successful variable elimination
     Solver s;
     s.setNumberOfVariables(4);
     s.addClauses({{1,2}, {3,2}, {-1,4,2}, {3,-2}, {3,4}});
-    auto expected = internal_representation({{1,3}, {3,-1,4}, {3}});
-    CHECK(expected == s.clause_distribution(var_index(internal_representation(2))));
+    bool var_eliminated = false;
+    CHECK(s.maybe_eliminate(var_index(internal_representation(2)), var_eliminated));
+    CHECK(var_eliminated);
+    check_clauses(s, {{3,4}, {1,3}, {3,-1,4}, {3}});
+    // conflict during variable elimination
+    Solver s1;
+    s.setNumberOfVariables(2);
+    s.addClauses({{1,2}, {1,-2}, {-1,-2}, {-1,2}});
+    bool var_eliminated1 = false;
+    CHECK(!s1.maybe_eliminate(var_index(internal_representation(2)), var_eliminated1));
+    // variable elimination exceeds bounds
+    Solver s2;
+    s.setNumberOfVariables(5);
+    s.addClauses({{1,2}, {3,2}, {-1,4,2}, {3,-2}, {3,4}, {2,5}, {-2,5}});
+    bool var_eliminated2 = false;
+    CHECK(s2.maybe_eliminate(var_index(internal_representation(2)), var_eliminated2));
+    CHECK(var_eliminated);
+    check_clauses(s, {{1,2}, {3,2}, {-1,4,2}, {3,-2}, {3,4}, {2,5}, {-2,5}});
 }
 
 TEST_CASE("Resolution") {

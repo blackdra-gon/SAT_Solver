@@ -45,7 +45,7 @@ bool Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
                 bumpVariable(var_index(literal));
             }
         } else {
-            // Add clause to occurencelists for preprocessing
+            // Add clause to occurrencelists for preprocessing
             for (auto literal: clause->literals) {
                 occurrence_lists[literal].emplace_back(clause);
             }
@@ -103,6 +103,8 @@ void Solver::setNumberOfVariables(int number) {
         antecedent_clauses.emplace_back();
         watch_lists.emplace_back();
         watch_lists.emplace_back();
+        occurrence_lists.emplace_back();
+        occurrence_lists.emplace_back();
         var_activities.push_back(1);
     }
 
@@ -120,6 +122,7 @@ std::optional<std::shared_ptr<Clause>> Solver::propagate() {
             auto clause = tmp_watchlist[i].lock();
             if (!clause) {
                 // The learnt clause referenced here was deleted in the meantime
+                // the associated weak pointer is now deleted, because it is not reinserted from the tmp_watchlist
                 continue;
             }
             if(!clause->propagate(*this, literal)) {
@@ -410,8 +413,8 @@ bool Solver::contains_true_literal(const std::shared_ptr<Clause>& clause) {
     });
 }
 
-std::vector<std::vector<Literal_t>> Solver::clause_distribution(Variable_t var) {
-    return {};
+bool Solver::maybe_eliminate(Variable_t var, bool &out_eliminated_var, uint bound_factor) {
+    return false;
 }
 
 std::vector<Literal_t> Solver::resolve(const Clause_ptr &a, const Clause_ptr& b, Variable_t var) {

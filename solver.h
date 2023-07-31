@@ -40,7 +40,7 @@ public:
     std::vector<std::shared_ptr<Clause>> learnt_clauses;
     std::queue<Literal_t> propagation_queue;
     std::vector<std::vector<std::weak_ptr<Clause>>> watch_lists; // literal indexed
-    std::vector<std::vector<Clause_ptr>> occurrence_lists; // literal indexed, for preprocessing only, should be deleted before search
+    std::vector<std::vector<Clause_wptr>> occurrence_lists; // literal indexed, for preprocessing only, should be deleted before search
 
 
 
@@ -129,7 +129,15 @@ public:
      * which contain this literal, are deleted, because they will never be useful for unit propagation
      */
     void pure_literal_elimination();
-    std::vector<std::vector<Literal_t>> clause_distribution(Variable_t var);
+    /**
+     *
+     * @param var variable to perform resolution on
+     * @param out_eliminated_var used to return whether or not var is eliminated
+     * @param bound_factor number of clauses after elimination may exceed the number of clauses before by bound_factor.
+     *                     Otherwise, the operation is cancelled
+     * @return false, if a conflict was detected in the meantime, true on success
+     */
+    bool maybe_eliminate(Variable_t var, bool &out_eliminated_var, uint bound_factor = 1);
     /**
      * @pre no unit literals in clauses. Otherwise it would be possible to derive the empty clause in this step
      * @param a contains a literal var
