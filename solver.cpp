@@ -46,9 +46,9 @@ bool Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
             }
         } else {
             // Add clause to occurrencelists for preprocessing
-            for (auto literal: clause->literals) {
-                occurrence_lists[literal].emplace_back(clause);
-            }
+                //for (auto literal: clause->literals) {
+                //    occurrence_lists[literal].emplace_back(clause);
+                //}
         }
         // Add clause to the watchlist of the negation of the two first elements
         watch_lists[negate_literal(clause->literals[0])].emplace_back(clause);
@@ -414,7 +414,10 @@ bool Solver::contains_true_literal(const std::shared_ptr<Clause>& clause) {
 }
 
 bool Solver::maybe_eliminate(Variable_t var, bool &out_eliminated_var, uint bound_factor) {
-    return false;
+    uint max_resolvents = clauses.size() * bound_factor;
+    auto positive_occurrences = occurrence_lists[positive_literal(var)];
+    auto negative_occurrences = occurrence_lists[negative_literal(var)];
+    return maybe_eliminate(positive_occurrences, negative_occurrences, out_eliminated_var, max_resolvents);
 }
 
 std::vector<Literal_t> Solver::resolve(const Clause_ptr &a, const Clause_ptr& b, Variable_t var) {
@@ -442,4 +445,17 @@ void Solver::delete_occurrence_lists() {
     for (auto list: occurrence_lists) {
         occurrence_lists.clear();
     }
+}
+
+bool
+Solver::maybe_eliminate(std::vector<Clause_wptr> &positive_occurrence, std::vector<Clause_wptr> &negative_occurrence,
+                        bool &out_eliminated_var, uint max_resolvents) {
+    std::vector<std::vector<Literal_t>> resolvents;
+    for (auto clause_p: positive_occurrence) {
+        if (clause_p.lock()) {}
+        for (auto clause_n: negative_occurrence) {
+
+        }
+    }
+    return false;
 }

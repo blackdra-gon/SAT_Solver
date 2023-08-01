@@ -39,6 +39,13 @@ Variable_t var_index(Literal_t l) {
     return l >> 1;
 }
 
+Literal_t positive_literal(Variable_t var_index) {
+    return var_index << 1;
+}
+
+Literal_t negative_literal(Variable_t var_index) {
+    return (var_index << 1) + 1;
+}
 /**
  *
  * @param l

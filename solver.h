@@ -139,6 +139,16 @@ public:
      */
     bool maybe_eliminate(Variable_t var, bool &out_eliminated_var, uint bound_factor = 1);
     /**
+     *
+     * @param positive_occurrence occurrence list
+     * @param negative_occurrence occurrence list
+     * @param out_eliminated_var used to return whether or not var is eliminated
+     * @param max_resolvents maximum number of resolvents, which is generated before this try of variable elimination is aborted
+     * @return false, if a conflict was detected in the meantime, true on success
+     */
+    bool maybe_eliminate(std::vector<Clause_wptr> &positive_occurrence, std::vector<Clause_wptr> &negative_occurrence,
+                         bool &out_eliminated_var, uint max_resolvents);
+    /**
      * @pre no unit literals in clauses. Otherwise it would be possible to derive the empty clause in this step
      * @param a contains a literal var
      * @param b contains a literal not(var) (or the other way round)

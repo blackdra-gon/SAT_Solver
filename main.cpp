@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         std::cout << "UNSATISFIABLE" << std::endl;
         return 0;
     }
-    s.delete_occurrence_lists();
+    //s.delete_occurrence_lists();
     //s.print_clauses();
     if (s.solve()) {
         std::cout << "SATISFIABLE" << std::endl;

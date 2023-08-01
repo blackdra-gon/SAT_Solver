@@ -29,6 +29,10 @@ lbool operator!(lbool b);
 
 lbool lsign(Literal_t);
 
+Literal_t negative_literal(Variable_t var_index);
+
+Literal_t positive_literal(Variable_t var_index);
+
 std::ostream &operator<<(std::ostream &os, const std::vector<Literal_t> &output);
 
 //using Clause = std::vector<Variable_t>;
