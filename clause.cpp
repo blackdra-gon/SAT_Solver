@@ -86,3 +86,7 @@ bool Clause::simplify(Solver &s) {
     literals.erase(std::next(literals.begin(), j), literals.end());
     return false;
 }
+
+bool Clause::operator<=(const Clause &other) const {
+    return literals <= other.literals;
+}

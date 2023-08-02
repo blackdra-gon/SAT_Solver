@@ -271,3 +271,11 @@ TEST_CASE("Search routine") {
     CHECK(s.search(100, 10) == TRUE);
 
 }
+
+TEST_CASE("Subsumption test") {
+    Clause c1(internal_representation({5,-7,13,8,23}));
+    Clause c2(internal_representation({5,-7,13,23}));
+    CHECK(c2 <= c1);
+    CHECK(!(c1 <= c2));
+    CHECK(c1 <= c1);
+}

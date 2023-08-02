@@ -239,6 +239,32 @@ void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
         std::cout << "WARNING: Capacity limit for storing learnt clause reached, will not store further clauses";
         return;
     }*/
+    if (learnt_clauses.size() >= 10) {
+        std::vector<int> to_delete;
+        for (int i = learnt_clauses.size() - 10; i < learnt_clauses.size(); ++i) {
+            if (clause <= learnt_clauses[i]->literals) {
+                std::cout << "Newly learnt clause " << clause << "\nsubsumes recently learnt clause " << learnt_clauses[i]->literals << std::endl;
+                to_delete.push_back(i);
+                continue;
+            }
+            for (int j = 0; j < clause.size(); ++j) {
+                std::vector<Literal_t> modified_clause(clause);
+                modified_clause[j] = negate_literal(modified_clause[j]);
+                if (modified_clause <= learnt_clauses[i]->literals) {
+                    std::cout << "Selfsubsuming resolution can be applied:" << std::endl;
+                    std::cout << "Newly learnt clause: " << clause << std::endl;
+                    std::cout << "Recently learnt clause: " << learnt_clauses[i]->literals << std::endl;
+                    std::cout << "Literal to resolve on: " << dimacs_format(modified_clause[j]) << std::endl;
+                    std::erase(learnt_clauses[i]->literals, modified_clause[j]);
+                }
+            }
+        }
+        for (int index: to_delete) {
+            if (!learnt_clauses[index]->locked(*this)) {
+                learnt_clauses.erase(learnt_clauses.begin() + index);
+            }
+        }
+    }
     if (clause.size() > 1) {
         addClause(clause, true);
         enqueue(clause[0], std::ref(learnt_clauses.back()));
