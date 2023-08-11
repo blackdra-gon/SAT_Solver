@@ -15,6 +15,13 @@
 #include "clauseRef.h"
 #include "variable_order.h"
 
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/queue.hpp>
+#include <boost/serialization/optional.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/deque.hpp>
+
 using Watchlists = std::vector<std::vector<std::reference_wrapper<Clause>>>;
 
 using Clause_ptr = std::shared_ptr<Clause>;
@@ -157,6 +164,27 @@ public:
      */
     std::vector<Literal_t> resolve(const Clause_ptr &a, const Clause_ptr& b, Variable_t var);
     void delete_occurrence_lists();
+
+    friend class boost::serialization::access;
+    // When the class Archive corresponds to an output archive, the
+    // & operator is defined similar to <<.  Likewise, when the class Archive
+    // is a type of input archive the & operator is defined similar to >>.
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ar & clauses;
+        ar & var_activities;
+        ar & learnt_clauses;
+        //ar & propagation_queue;
+        ar & watch_lists;
+        // occurrence_lists;
+        ar & assignments; // variable indexed
+        ar & trail;
+        ar & trail_limits;
+        ar & antecedent_clauses; // variable indexed
+        ar & decision_levels; // variable indexed
+    }
+    void serialize_solver_state();
 private:
     bool contains_true_literal(const std::shared_ptr<Clause>& clause);
 };

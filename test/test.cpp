@@ -7,6 +7,7 @@
 #include "test_util.h"
 
 #include <catch2/catch_test_macros.hpp>
+#include <fstream>
 
 TEST_CASE("Input") {
     Solver s;
@@ -270,4 +271,18 @@ TEST_CASE("Search routine") {
     s.addClauses({{-1,-2,-3,-4}, {-1,-2,-3,4}, {5,6}, {7,8}, {9,10}});
     CHECK(s.search(100, 10) == TRUE);
 
+}
+
+TEST_CASE("Serialization") {
+    Solver s;
+    s.setNumberOfVariables(3);
+    s.addClauses({{1,2,3}, {-1,-2}});
+    s.serialize_solver_state();
+    std::ofstream ofs("clause_export");
+    {
+        boost::archive::text_oarchive oa(ofs);
+        // write class instance to archive
+        oa << s.clauses[0];
+        // archive and stream closed when destructors are called
+    }
 }

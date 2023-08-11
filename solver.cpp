@@ -8,10 +8,11 @@
 #include <algorithm>
 #include <chrono>
 #include <set>
+#include <fstream>
 #include "solver.h"
 #include "clause.h"
 #include "encoding_util.h"
-
+#include <boost/serialization/vector.hpp>
 
 bool Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
     if (literals.empty()) {
@@ -458,4 +459,15 @@ Solver::maybe_eliminate(std::vector<Clause_wptr> &positive_occurrence, std::vect
         }
     }
     return false;
+}
+
+void Solver::serialize_solver_state() {
+    std::ofstream ofs("solver_state");
+    {
+        boost::archive::text_oarchive oa(ofs);
+        // write class instance to archive
+        oa << this;
+        // archive and stream closed when destructors are called
+    }
+
 }
