@@ -59,6 +59,7 @@ public:
      * conducted.
      */
     std::vector<int> trail_limits;
+    //TODO: Replace optional with empty weak pointers here
     std::vector<std::optional<std::weak_ptr<Clause>>> antecedent_clauses; // variable indexed
     std::vector<int> decision_levels; // variable indexed
 
@@ -89,7 +90,7 @@ public:
      * @param clauses in dimacs representation
      * @return true on success, false when an added unit clause causes a conflict
      */
-    bool addClauses(const std::vector<std::vector<int>>& clauses);
+    bool addClauses(const std::vector<std::vector<int>>& clauses, bool learnt= false);
     void setNumberOfVariables(int number);
     /**
      * Add a unit constraint to the propagation queue and also add the respective assignment

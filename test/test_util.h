@@ -39,14 +39,16 @@ void check_watchlists(Solver &s, const std::vector<std::vector<int>>& expected_c
     }
 }
 
-void check_clauses(Solver &s, const std::vector<std::vector<int>>& expected_clauses) {
+void check_clauses(Solver &s, const std::vector<std::vector<int>>& expected_clauses, bool learnt= false) {
     std::vector<Clause> expected;
     for (const auto& clause: expected_clauses) {
         expected.emplace_back(internal_representation(clause));
     }
     int i = 0;
-    for (const auto& clause_ptr: s.clauses) {
-        CHECK(*clause_ptr == expected[i]);
+    auto clause_vector = learnt ? s.learnt_clauses : s.clauses;
+    for (const auto& clause_ptr: clause_vector) {
+        CHECK(*clause_ptr <= expected[i]);
+        CHECK( expected[i] <= *clause_ptr);
         ++i;
     }
 }

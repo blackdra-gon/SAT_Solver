@@ -279,3 +279,11 @@ TEST_CASE("Subsumption test") {
     CHECK(!(c1 <= c2));
     CHECK(c1 <= c1);
 }
+
+TEST_CASE("Backward Subsumption on last learnt clauses") {
+    Solver s;
+    s.setNumberOfVariables(5);
+    s.addClauses({{1,2,3}, {-4, -5}, {1,2,-3}, {-1,-3,-5}, {2,3,-4}, {5,-3,2,1}}, true);
+    s.record_learnt_clause(internal_representation({1,2}));
+    check_clauses(s, {{-4,-5}, {-1,-3,-5}, {2,3,-4}, {1,2}}, true);
+}
