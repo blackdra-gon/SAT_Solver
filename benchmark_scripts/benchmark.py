@@ -12,6 +12,13 @@ global result_file
 #folder_path = '/home/benjamin/Documents/Uni/SAT-Solver_Seminar/benchmark/'
 folder_path = '/home/benjamin/Documents/Uni/SAT-Solver_Seminar/uf250-1065/'
 use_n_files = 100
+easy_instances_from_benchmarkset = ["5099718e4b5b8fe2ba7f8b919fdfde2d-satcoin-genesis-SAT-5.cnf",
+                                    "cfa14a7015b0f7fecd98e898f3c95896-velev-vliw-sat-4.0-b8.cnf",
+                                    "0616ca6b1e0ae639d12e19ed310963a9-satcoin-genesis-SAT-4.cnf",
+                                    "920bbe559da4ea37fd636605316a791c-SCPC-500-19.cnf",
+                                    "c0df94532b1ca8a705d3af05378f377d-SCPC-500-20.cnf",
+                                    "b96071f89fa1b1670b8375010b1dd42b-SCPC-500-9.cnf"
+                                    ]
 
 def duration_min_sec(start_time):
     duration = time.time() - start_time
@@ -43,10 +50,11 @@ def execute_program_for_files(folder_path):
     global_start_time = time.time()
     # Iterate over files in the given folder
     folder_content = os.listdir(folder_path)
-    folder_content.sort()
+    problem_files = [file for file in folder_content if pathlib.Path(file).suffix != '.sol']
+    problem_files.sort()
     if use_n_files != 0:
-        folder_content = folder_content[:use_n_files]
-    for filename in folder_content:
+        problem_files = problem_files[:use_n_files]
+    for filename in problem_files:
         file_path = os.path.join(folder_path, filename)
         result = execute_program_p(file_path)
         result.insert(0, filename)
@@ -80,6 +88,7 @@ if __name__ == '__main__':
     print('benchmark started at ' + str(datetime.datetime.now()))
     create_result_file()
     execute_program_for_files(folder_path)
+    result_file.close()
 
     #
     # # Exclude directories
