@@ -49,6 +49,7 @@ public:
      * @return false, if conflict occurs. true on succes
      */
     bool propagate(Solver& s, Literal_t l);
+    bool find_new_literal_to_watch(Solver& s, int watch_to_replace_index);
     /**
      *
      * @param s Solver

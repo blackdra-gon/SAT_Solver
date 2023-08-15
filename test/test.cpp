@@ -287,3 +287,44 @@ TEST_CASE("Backward Subsumption on last learnt clauses") {
     s.record_learnt_clause(internal_representation({1,2}));
     check_clauses(s, {{-4,-5}, {-1,-3,-5}, {2,3,-4}, {1,2}}, true);
 }
+
+TEST_CASE("Selfsubsuming resolution on last learnt clauses") {
+    Solver s;
+    s.setNumberOfVariables(25);
+    s.addClauses({{5, -7, 13, 8, 23}, {-5, -7, 13, 8, 23}}, true);
+    s.record_learnt_clause(internal_representation({5,-7, -13, 23}));
+    check_clauses(s, {{5,-7,8,23}, {-5,-7,13,8,23}, {5,-7,-13,23}}, true);
+}
+
+TEST_CASE("Replace watched literal") {
+    Solver s;
+    s.setNumberOfVariables(5);
+    s.addClauses({{1,2,3,4,5}});
+    s.assignments = {UNASSIGNED, UNASSIGNED, UNASSIGNED, UNASSIGNED, UNASSIGNED};
+    check_watchlists(s, {
+            {}, {0},
+            {}, {0},
+            {}, {},
+            {}, {},
+            {}, {},
+    });
+    s.clauses[0]->find_new_literal_to_watch(s, 0);
+    check_watchlists(s, {
+                         {}, {},
+                         {}, {0},
+                         {}, {0},
+                         {}, {},
+                         {}, {},
+                         });
+    s.assignments = {FALSE, UNASSIGNED, UNASSIGNED, FALSE, FALSE};
+    CHECK(!s.clauses[0]->find_new_literal_to_watch(s, 1));
+    s.assignments = {FALSE, UNASSIGNED, UNASSIGNED, TRUE, FALSE};
+    s.clauses[0]->find_new_literal_to_watch(s, 0);
+    check_watchlists(s, {
+            {}, {},
+            {}, {0},
+            {}, {},
+            {}, {0},
+            {}, {},
+    });
+}

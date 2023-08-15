@@ -235,27 +235,16 @@ void Solver::backtrack_one_level() {
 }
 
 void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
-    /*if (learnt_clauses.size() == learnt_clauses.capacity()) {
-        std::cout << "WARNING: Capacity limit for storing learnt clause reached, will not store further clauses";
-        return;
-    }*/
+    // Try Backward Subsumption on the last learnt clauses
     uint nof_clauses_to_lock_back = std::min(size_t(10), learnt_clauses.size());
-
-    //auto last_learnt_clauses = std::next(learnt_clauses.end(), -nof_clauses_to_lock_back);
     auto last_learnt_clauses = learnt_clauses.end() - nof_clauses_to_lock_back;
     auto remove = std::remove_if(last_learnt_clauses, learnt_clauses.end(),
                    [&clause](Clause_ptr& c) { return clause <= c->literals; });
     learnt_clauses.erase(remove, learnt_clauses.end());
-    std::vector<int> to_delete;
-    /*for (int i = learnt_clauses.size() - 10; i < learnt_clauses.size(); ++i) {
-        // Try Backward Subsumption on the last learnt clauses
-        if (clause <= learnt_clauses[i]->literals) {
-            std::cout << "Newly learnt clause " << clause << "\nsubsumes recently learnt clause " << learnt_clauses[i]->literals << std::endl;
-            to_delete.push_back(i);
-            continue;
-        }*/
-        // Try Selfsubsuming resolution with the last learnt clauses
-        /*for (int j = 0; j < clause.size(); ++j) {
+    // Try Selfsubsuming resolution with the last learnt clauses
+    for (int i = learnt_clauses.size() - nof_clauses_to_lock_back; i < learnt_clauses.size(); ++i) {
+
+        for (int j = 0; j < clause.size(); ++j) {
             std::vector<Literal_t> modified_clause(clause);
             modified_clause[j] = negate_literal(modified_clause[j]);
             if (modified_clause <= learnt_clauses[i]->literals) {
@@ -263,10 +252,17 @@ void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
                 std::cout << "Newly learnt clause: " << clause << std::endl;
                 std::cout << "Recently learnt clause: " << learnt_clauses[i]->literals << std::endl;
                 std::cout << "Literal to resolve on: " << dimacs_format(modified_clause[j]) << std::endl;
-                std::erase(learnt_clauses[i]->literals, modified_clause[j]);
+                // Has to keep watchlists intact
+                //std::erase(learnt_clauses[i]->literals, modified_clause[j]);
+                auto it = std::remove(learnt_clauses[i]->literals.begin() + 2, learnt_clauses[i]->literals.end(), modified_clause[j]);
+                auto r = std::distance(it, learnt_clauses[i]->literals.end());
+                learnt_clauses[i]->literals.erase(it, learnt_clauses[i]->literals.end());
+                if (r == 0) {
+                    std::cout << "literal was not deleted, because of watchlist" << std::endl;
+                }
             }
-        }*/
-
+        }
+    }
     /*for (int index: to_delete) {
         if (!learnt_clauses[index]->locked(*this)) {
             learnt_clauses.erase(learnt_clauses.begin() + index);
@@ -274,7 +270,6 @@ void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
             std::cout << "Tried to erase locked clause " << *learnt_clauses[index] << std::endl;
             std::cout << "Learnt clause is" << clause << std::endl;
         }
-    }
     }*/
     if (clause.size() > 1) {
         addClause(clause, true);

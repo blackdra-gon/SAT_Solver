@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <cassert>
 #include "clause.h"
 #include "solver.h"
 #include "encoding_util.h"
@@ -89,4 +90,21 @@ bool Clause::simplify(Solver &s) {
 
 bool Clause::operator<=(const Clause &other) const {
     return literals <= other.literals;
+}
+
+bool Clause::find_new_literal_to_watch(Solver &s, int watch_to_replace_index) {
+    assert(watch_to_replace_index == 0 || watch_to_replace_index == 1);
+    for (int i = 2; i < literals.size(); ++i) {
+        if (s.value(literals[i]) != FALSE) {
+            auto temp = literals[watch_to_replace_index];
+            literals[watch_to_replace_index] = literals[i];
+            literals[i] = temp;
+            s.watch_lists[negate_literal(literals[watch_to_replace_index])].emplace_back(weak_from_this());
+            //if (s.watch_lists[negate_literal(temp)][0].lock() == shared_from_this())
+            //std::remove(s.watch_lists[negate_literal(temp)].begin(), s.watch_lists[negate_literal(temp)].end(), weak_from_this());
+            std::erase_if(s.watch_lists[negate_literal(temp)], [this](const Clause_wptr& c) {return c.lock() == shared_from_this();});
+            return true;
+        }
+    }
+    return false;
 }
