@@ -274,6 +274,8 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
                 }
                 if (literal_can_be_removed) {
                     std::erase(learnt_clauses[i]->literals, modified_clause[j]);
+                    // clause changed, need to reset signature
+                    learnt_clauses[i]->set_signature();
 #if COLLECT_SOLVER_STATISTICS
                     ++solver_stats.statistics["literals_deleted_from_recently_learned_clauses_with_ssr"];
 #endif

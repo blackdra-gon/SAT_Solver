@@ -88,12 +88,24 @@ bool Clause::simplify(Solver &s) {
     s.solver_stats.statistics["literals_deleted_during_preprocessing"] += literals.size() - j;
 #endif
     literals.erase(std::next(literals.begin(), j), literals.end());
+    set_signature();
     return false;
 }
 
 bool Clause::operator<=(const Clause &other) const {
+    if ((signature & ~other.signature) != 0) {
+        return false;
+    }
     return literals <= other.literals;
 }
+
+void Clause::set_signature() {
+    signature = 0;
+    for (auto literal: this->literals) {
+        signature = signature | (1ll << (literal % 64));
+    }
+}
+
 
 bool Clause::find_new_literal_to_watch(Solver &s, int watch_to_replace_index) {
     assert(watch_to_replace_index == 0 || watch_to_replace_index == 1);

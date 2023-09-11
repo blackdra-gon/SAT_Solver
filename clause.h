@@ -19,9 +19,11 @@ class Clause : public std::enable_shared_from_this<Clause>{
 public:
     explicit Clause(std::vector<Literal_t> literals, bool learnt= false): literals(std::move(literals)), learnt(learnt) {
         activity = 1;
-    }
+        set_signature();
+    };
 
     std::vector<Literal_t> literals;
+    uint64_t signature;
     bool learnt;
     double activity;
     /**
@@ -65,6 +67,8 @@ public:
      * @return true, if a literal in the clause is already true, therefore the clause can be deleted
      */
     bool simplify(Solver &s);
+
+    void set_signature();
 
 
 };
