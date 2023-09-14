@@ -111,7 +111,7 @@ public:
     void pop_trail();
     void backtrack_until(int level);
     void backtrack_one_level();
-    void record_learnt_clause( const std::vector<Literal_t>& clause);
+    void record_learnt_clause( std::vector<Literal_t> &clause);
 
     void print_clauses();
     friend class VariableOrder;

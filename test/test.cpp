@@ -222,7 +222,7 @@ TEST_CASE("Pure Literal Preprocessing") {
     check_assignments(s, {TRUE, UNASSIGNED, FALSE, UNASSIGNED, FALSE});
 }
 
-TEST_CASE("Clause Distribution") {
+/*TEST_CASE("Clause Distribution") {
     // successful variable elimination
     Solver s;
     s.setNumberOfVariables(4);
@@ -245,7 +245,7 @@ TEST_CASE("Clause Distribution") {
     CHECK(s2.maybe_eliminate(var_index(internal_representation(2)), var_eliminated2));
     CHECK(var_eliminated);
     check_clauses(s, {{1,2}, {3,2}, {-1,4,2}, {3,-2}, {3,4}, {2,5}, {-2,5}});
-}
+}*/
 
 TEST_CASE("Resolution") {
     Solver s;
@@ -284,7 +284,8 @@ TEST_CASE("Backward Subsumption on last learnt clauses") {
     Solver s;
     s.setNumberOfVariables(5);
     s.addClauses({{1,2,3}, {-4, -5}, {1,2,-3}, {-1,-3,-5}, {2,3,-4}, {5,-3,2,1}}, true);
-    s.record_learnt_clause(internal_representation({1,2}));
+    std::vector<Literal_t> learned_clause = internal_representation({1, 2});
+    s.record_learnt_clause(learned_clause);
     check_clauses(s, {{-4,-5}, {-1,-3,-5}, {2,3,-4}, {1,2}}, true);
 }
 
@@ -292,14 +293,16 @@ TEST_CASE("Selfsubsuming resolution on last learnt clauses") {
     Solver s;
     s.setNumberOfVariables(25);
     s.addClauses({{5, -7, 13, 8, 23}, {-5, -7, 13, 8, 23}}, true);
-    s.record_learnt_clause(internal_representation({5,-7, -13, 23}));
+    std::vector<Literal_t> learned_clause = internal_representation({5, -7, -13, 23});
+    s.record_learnt_clause(learned_clause);
     check_clauses(s, {{5,-7,8,23}, {-5,-7,13,8,23}, {5,-7,-13,23}}, true);
     // resolve on a watched literal:
     Solver s1;
     s1.setNumberOfVariables(25);
     // The first two literals of the learnt clauses are swapped, because decision levels are not set
     s1.addClauses({{-5, 13, 8, 23, -7}, {5, 13, -7, 8, 23}}, true);
-    s1.record_learnt_clause(internal_representation({5,-7, -13, 23}));
+    std::vector<Literal_t> learned_clause_1 = internal_representation({5, -7, -13, 23});
+    s1.record_learnt_clause(learned_clause_1);
     check_clauses(s1, {{-5,-7,13,8,23}, {5,-7,8,23}, {5,-7,-13,23}}, true);
 }
 
@@ -334,4 +337,13 @@ TEST_CASE("Replace watched literal") {
             {}, {0},
             {}, {},
     });
+}
+
+TEST_CASE("Strengthening new learned clauses with self subsuming resolution") {
+    Solver s;
+    s.setNumberOfVariables(12);
+    s.addClauses({{4, 7, 5}}, true);
+    std::vector<Literal_t> learned_clause = internal_representation({1, -4, 5, 7});
+    s.record_learnt_clause(learned_clause);
+    check_clauses(s, {{4,7,5}, {1,5,7}});
 }

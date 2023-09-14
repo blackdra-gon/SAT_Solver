@@ -234,7 +234,7 @@ void Solver::backtrack_one_level() {
     trail_limits.pop_back();
 }
 
-void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
+void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
     // Try Backward Subsumption on the last learnt clauses
     uint nof_clauses_to_lock_back = std::min(size_t(10), learnt_clauses.size());
     auto last_learnt_clauses = learnt_clauses.end() - nof_clauses_to_lock_back;
@@ -249,10 +249,10 @@ void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
             modified_clause[j] = negate_literal(modified_clause[j]);
             std::vector<Literal_t> &learnt_clause_literals = learnt_clauses[i]->literals;
             if (modified_clause <= learnt_clause_literals) {
-                std::cout << "Selfsubsuming resolution can be applied:" << std::endl;
+                /*std::cout << "Selfsubsuming resolution can be applied:" << std::endl;
                 std::cout << "Newly learnt clause: " << clause << std::endl;
                 std::cout << "Recently learnt clause: " << learnt_clause_literals << std::endl;
-                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause[j]) << std::endl;
+                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause[j]) << std::endl;*/
                 // Has to keep watchlists intact
                 auto literal_to_remove = std::ranges::find(learnt_clause_literals, modified_clause[j]);
                 auto index = literal_to_remove - learnt_clause_literals.begin();
@@ -267,22 +267,24 @@ void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
                 } else {
                     std::cout << "literal was not deleted, because no new literal to watch was found" << std::endl;
                 }
+            } else if (learnt_clause_literals <= modified_clause) {
+                /*std::cout << "Newly learnt clause can be strengthend" << std::endl;
+                std::cout << "Newly learnt clause: " << clause << std::endl;
+                std::cout << "Recently learnt clause: " << learnt_clause_literals << std::endl;
+                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause[j]) << std::endl;*/
+                std::erase(clause, modified_clause[j]);
             }
         }
     }
-    /*for (int index: to_delete) {
-        if (!learnt_clauses[index]->locked(*this)) {
-            learnt_clauses.erase(learnt_clauses.begin() + index);
-        } else {
-            std::cout << "Tried to erase locked clause " << *learnt_clauses[index] << std::endl;
-            std::cout << "Learnt clause is" << clause << std::endl;
-        }
-    }*/
+    // Would it be possible that selfsubsuming resolution deletes the last literal? No
+    assert(!clause.empty());
     if (clause.size() > 1) {
         addClause(clause, true);
         enqueue(clause[0], learnt_clauses.back());
+    } else {
+        //std::cout << "Learned clause with only one literal" << std::endl;
+        enqueue(clause[0]);
     }
-    enqueue(clause[0]);
 }
 
 bool Solver::solve() {
