@@ -247,18 +247,25 @@ void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
         for (int j = 0; j < clause.size(); ++j) {
             std::vector<Literal_t> modified_clause(clause);
             modified_clause[j] = negate_literal(modified_clause[j]);
-            if (modified_clause <= learnt_clauses[i]->literals) {
+            std::vector<Literal_t> &learnt_clause_literals = learnt_clauses[i]->literals;
+            if (modified_clause <= learnt_clause_literals) {
                 std::cout << "Selfsubsuming resolution can be applied:" << std::endl;
                 std::cout << "Newly learnt clause: " << clause << std::endl;
-                std::cout << "Recently learnt clause: " << learnt_clauses[i]->literals << std::endl;
+                std::cout << "Recently learnt clause: " << learnt_clause_literals << std::endl;
                 std::cout << "Literal to resolve on: " << dimacs_format(modified_clause[j]) << std::endl;
                 // Has to keep watchlists intact
-                //std::erase(learnt_clauses[i]->literals, modified_clause[j]);
-                auto it = std::remove(learnt_clauses[i]->literals.begin() + 2, learnt_clauses[i]->literals.end(), modified_clause[j]);
-                auto r = std::distance(it, learnt_clauses[i]->literals.end());
-                learnt_clauses[i]->literals.erase(it, learnt_clauses[i]->literals.end());
-                if (r == 0) {
-                    std::cout << "literal was not deleted, because of watchlist" << std::endl;
+                auto literal_to_remove = std::ranges::find(learnt_clause_literals, modified_clause[j]);
+                auto index = literal_to_remove - learnt_clause_literals.begin();
+                bool literal_can_be_removed = true;
+                if (index == 0 || index == 1) {
+                    if (!learnt_clauses[i]->find_new_literal_to_watch(*this, index)) {
+                        literal_can_be_removed = false;
+                    }
+                }
+                if (literal_can_be_removed) {
+                    std::erase(learnt_clauses[i]->literals, modified_clause[j]);
+                } else {
+                    std::cout << "literal was not deleted, because no new literal to watch was found" << std::endl;
                 }
             }
         }

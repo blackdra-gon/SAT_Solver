@@ -294,6 +294,13 @@ TEST_CASE("Selfsubsuming resolution on last learnt clauses") {
     s.addClauses({{5, -7, 13, 8, 23}, {-5, -7, 13, 8, 23}}, true);
     s.record_learnt_clause(internal_representation({5,-7, -13, 23}));
     check_clauses(s, {{5,-7,8,23}, {-5,-7,13,8,23}, {5,-7,-13,23}}, true);
+    // resolve on a watched literal:
+    Solver s1;
+    s1.setNumberOfVariables(25);
+    // The first two literals of the learnt clauses are swapped, because decision levels are not set
+    s1.addClauses({{-5, 13, 8, 23, -7}, {5, 13, -7, 8, 23}}, true);
+    s1.record_learnt_clause(internal_representation({5,-7, -13, 23}));
+    check_clauses(s1, {{-5,-7,13,8,23}, {5,-7,8,23}, {5,-7,-13,23}}, true);
 }
 
 TEST_CASE("Replace watched literal") {
