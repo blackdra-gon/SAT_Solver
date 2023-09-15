@@ -356,14 +356,15 @@ void Solver::reduce_learnt_clauses() {
     std::ranges::sort(learnt_clauses, [](const std::shared_ptr<Clause>& a, const std::shared_ptr<Clause>& b) {
         return a->activity > b->activity;
     });
-    size_t middle = learnt_clauses.size() / 2;
+    auto size_before = learnt_clauses.size();
+    size_t middle = size_before / 2;
     auto half_learnt_clause = std::next(learnt_clauses.begin(), middle);
     auto result = std::remove_if(half_learnt_clause, learnt_clauses.end(), [this](const std::shared_ptr<Clause>& c) {
         return !c->locked(*this);
     });
     learnt_clauses.erase(result, learnt_clauses.end());
 #if COLLECT_SOLVER_STATISTICS
-    solver_stats.statistics["number_of_deleted_clauses"] = learnt_clauses.end() - result;
+    solver_stats.statistics["number_of_deleted_clauses"] += size_before - learnt_clauses.size();
 #endif
 }
 
