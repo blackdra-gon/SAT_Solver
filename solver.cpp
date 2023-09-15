@@ -42,7 +42,6 @@ bool Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
             // Bumping
             for (auto literal: literals) {
                 bumpVariable(var_index(literal));
-                // TODO Bump Clause
             }
         }
         // Add clause to the watchlist of the negation of the two first elements
@@ -105,6 +104,9 @@ void Solver::setNumberOfVariables(int number) {
 
 std::optional<std::shared_ptr<Clause>> Solver::propagate() {
     while (!propagation_queue.empty()) {
+#if COLLECT_SOLVER_STATISTICS
+        ++solver_stats.number_of_propagated_literals;
+#endif
         Literal_t literal = propagation_queue.front();
         // std::cout << "LEVEL " << current_decision_level() << ": Propagating " << dimacs_format(literal) << std::endl;
         propagation_queue.pop();
@@ -115,6 +117,7 @@ std::optional<std::shared_ptr<Clause>> Solver::propagate() {
             auto clause = tmp_watchlist[i].lock();
             if (!clause) {
                 // The learnt clause referenced here was deleted in the meantime
+                // the associated weak pointer is now deleted, because it is not reinserted from the tmp_watchlist
                 continue;
             }
             if(!clause->propagate(*this, literal)) {
@@ -134,11 +137,11 @@ std::optional<std::shared_ptr<Clause>> Solver::propagate() {
  * Should only be called once for every solver object. Used only for testing.
  * @param clauses
  */
-bool Solver::addClauses(const std::vector<std::vector<int>>& clauses) {
+bool Solver::addClauses(const std::vector<std::vector<int>>& clauses, bool learnt) {
     //clauses.reserve(input_clauses.size());
     learnt_clauses.reserve(clauses.size() * 10);
     for (const auto& literal_list: clauses) {
-        if (!addClause(internal_representation(literal_list), false)) {
+        if (!addClause(internal_representation(literal_list), learnt)) {
             return false;
         }
     }
@@ -226,16 +229,14 @@ void Solver::backtrack_one_level() {
     trail_limits.pop_back();
 }
 
-void Solver::record_learnt_clause(const std::vector<Literal_t>& clause) {
-    /*if (learnt_clauses.size() == learnt_clauses.capacity()) {
-        std::cout << "WARNING: Capacity limit for storing learnt clause reached, will not store further clauses";
-        return;
-    }*/
+void Solver::record_learnt_clause(std::vector<Literal_t>& clause) {
     if (clause.size() > 1) {
         addClause(clause, true);
-        enqueue(clause[0], std::ref(learnt_clauses.back()));
+        enqueue(clause[0], learnt_clauses.back());
+    } else {
+        //std::cout << "Learned clause with only one literal" << std::endl;
+        enqueue(clause[0]);
     }
-    enqueue(clause[0]);
 }
 
 bool Solver::solve() {
@@ -246,6 +247,9 @@ bool Solver::solve() {
         status = search(int(number_of_conflicts_until_restart), int(max_learnt_clauses));
         number_of_conflicts_until_restart *= 1.5;
         max_learnt_clauses *= 1.1;
+#if COLLECT_SOLVER_STATISTICS
+        ++solver_stats.number_of_restarts;
+#endif
     }
     return status == TRUE;
 }
@@ -257,6 +261,9 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
         if (conflicting_clause) {
             // Conflict handling
             ++conflict_counter;
+#if COLLECT_SOLVER_STATISTICS
+            ++solver_stats.number_of_conflicts;
+#endif
             // std::cout << "Conflict in " << *conflicting_clause.value() << std::endl;
             if (current_decision_level() == 0) {
                 return FALSE;
@@ -288,7 +295,9 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
             Literal_t next_assumption = next_unassigned_variable();
             // std::cout << "LEVEL " << current_decision_level() + 1 << ": Assuming " << dimacs_format(next_assumption) << std::endl;
             assume(next_assumption);
-
+#if COLLECT_SOLVER_STATISTICS
+            ++solver_stats.number_of_decisions;
+#endif
         }
     }
 }
@@ -353,21 +362,21 @@ void Solver::reduce_learnt_clauses() {
         return !c->locked(*this);
     });
     learnt_clauses.erase(result, learnt_clauses.end());
+#if COLLECT_SOLVER_STATISTICS
+    solver_stats.number_of_deleted_clauses = learnt_clauses.end() - result;
+#endif
 }
 
 bool Solver::preprocess() {
-    auto start = std::chrono::steady_clock::now();
-    //pure_literal_elimination();
     if (!propagation_queue.empty()) {
         if (propagate() != std::nullopt) {
             return false;
         }
         auto erased_clauses = std::erase_if(clauses, [this](auto clause) { return clause->simplify(*this); });
-        std::cout << "Erased " << erased_clauses << " clauses during preprocessing" << std::endl;
+#if COLLECT_SOLVER_STATISTICS
+        solver_stats.clauses_deleted_during_preprocessing = erased_clauses;
+#endif
     }
-    auto stop = std::chrono::steady_clock::now();
-    std::cout << "Preprocessing took " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count()
-            << " milliseconds" << std::endl;
     std::cout << "finished preprocessing" << std::endl;
     return true;
 }

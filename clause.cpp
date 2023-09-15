@@ -84,5 +84,8 @@ bool Clause::simplify(Solver &s) {
         //}
     }
     literals.erase(std::next(literals.begin(), j), literals.end());
+#if COLLECT_SOLVER_STATISTICS
+    s.solver_stats.literals_deleted_during_preprocessing += literals.size() - j;
+#endif
     return false;
 }

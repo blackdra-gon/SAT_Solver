@@ -5,6 +5,8 @@
 #ifndef SAT_SOLVER_SOLVER_H
 #define SAT_SOLVER_SOLVER_H
 
+#define COLLECT_SOLVER_STATISTICS true
+
 #include <vector>
 #include <queue>
 #include <optional>
@@ -14,8 +16,14 @@
 #include "clause.h"
 #include "clauseRef.h"
 #include "variable_order.h"
+#if COLLECT_SOLVER_STATISTICS
+    #include "Solver_Stats.h"
+#endif
 
 using Watchlists = std::vector<std::vector<std::reference_wrapper<Clause>>>;
+
+using Clause_ptr = std::shared_ptr<Clause>;
+using Clause_wptr = std::weak_ptr<Clause>;
 
 
 class Solver {
@@ -27,7 +35,7 @@ public:
     bool solve();
 
     /**
-     * is called internaly by solve() to look for a solution. Might return UNASSIGNED, when restarts are implemented
+     * is called internally by solve() to look for a solution. Might return UNASSIGNED, when restarts are implemented
      * @return
      */
     lbool search(uint32_t number_of_conflicts, uint32_t maximum_learnt_clauses);
@@ -55,11 +63,11 @@ public:
      * conducted.
      */
     std::vector<int> trail_limits;
+    //TODO: Replace optional with empty weak pointers here
     std::vector<std::optional<std::weak_ptr<Clause>>> antecedent_clauses; // variable indexed
     std::vector<int> decision_levels; // variable indexed
 
     // Variable ordering
-    VariableOrder variableOrder;
     std::vector<double> var_activities; // variable indexed
     void bumpVariable(Variable_t var);
     void decayActivities();
@@ -85,7 +93,7 @@ public:
      * @param clauses in dimacs representation
      * @return true on success, false when an added unit clause causes a conflict
      */
-    bool addClauses(const std::vector<std::vector<int>>& clauses);
+    bool addClauses(const std::vector<std::vector<int>>& clauses, bool learnt= false);
     void setNumberOfVariables(int number);
     /**
      * Add a unit constraint to the propagation queue and also add the respective assignment
@@ -106,7 +114,7 @@ public:
     void pop_trail();
     void backtrack_until(int level);
     void backtrack_one_level();
-    void record_learnt_clause( const std::vector<Literal_t>& clause);
+    void record_learnt_clause( std::vector<Literal_t> &clause);
 
     void print_clauses();
     friend class VariableOrder;
@@ -125,6 +133,9 @@ public:
      * which contain this literal, are deleted, because they will never be useful for unit propagation
      */
     void pure_literal_elimination();
+#if COLLECT_SOLVER_STATISTICS
+    Solver_Stats solver_stats;
+#endif
 private:
     bool contains_true_literal(const std::shared_ptr<Clause>& clause);
 };
