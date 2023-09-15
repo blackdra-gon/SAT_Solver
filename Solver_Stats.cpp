@@ -13,5 +13,5 @@ void Solver_Stats::print_statistics() {
     for (const auto& [key, value] : statistics) {
         std::cout << value << ",";
     }
-
+    std::cout << std::endl;
 }

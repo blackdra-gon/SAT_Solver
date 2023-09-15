@@ -84,10 +84,10 @@ bool Clause::simplify(Solver &s) {
             //std::cout << "erased literal " << dimacs_format(literal) << std::endl;
         //}
     }
-    literals.erase(std::next(literals.begin(), j), literals.end());
 #if COLLECT_SOLVER_STATISTICS
     s.solver_stats.statistics["literals_deleted_during_preprocessing"] += literals.size() - j;
 #endif
+    literals.erase(std::next(literals.begin(), j), literals.end());
     return false;
 }
 

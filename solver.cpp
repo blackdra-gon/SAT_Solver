@@ -243,10 +243,14 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
     auto last_learnt_clauses = learnt_clauses.end() - nof_clauses_to_lock_back;
     auto remove = std::remove_if(last_learnt_clauses, learnt_clauses.end(),
                    [&clause](Clause_ptr& c) { return clause <= c->literals; });
+#if COLLECT_SOLVER_STATISTICS
+    auto nof_learned_clauses_before = learnt_clauses.size();
+#endif
     learnt_clauses.erase(remove, learnt_clauses.end());
 #if COLLECT_SOLVER_STATISTICS
-    solver_stats.statistics["clauses_deleted_during_inprocessing_subsumption"] += learnt_clauses.end() - remove;
+    solver_stats.statistics["clauses_deleted_during_inprocessing_subsumption"] += nof_learned_clauses_before - learnt_clauses.size();
 #endif
+
     // Try Selfsubsuming resolution with the last learnt clauses
     for (int i = learnt_clauses.size() - nof_clauses_to_lock_back; i < learnt_clauses.size(); ++i) {
 
@@ -419,14 +423,15 @@ void Solver::reduce_learnt_clauses() {
     std::ranges::sort(learnt_clauses, [](const std::shared_ptr<Clause>& a, const std::shared_ptr<Clause>& b) {
         return a->activity > b->activity;
     });
-    size_t middle = learnt_clauses.size() / 2;
+    auto size_before = learnt_clauses.size();
+    size_t middle = size_before / 2;
     auto half_learnt_clause = std::next(learnt_clauses.begin(), middle);
     auto result = std::remove_if(half_learnt_clause, learnt_clauses.end(), [this](const std::shared_ptr<Clause>& c) {
         return !c->locked(*this);
     });
     learnt_clauses.erase(result, learnt_clauses.end());
 #if COLLECT_SOLVER_STATISTICS
-    solver_stats.statistics["number_of_deleted_clauses"] = learnt_clauses.end() - result;
+    solver_stats.statistics["number_of_deleted_clauses"] += size_before - learnt_clauses.size();
 #endif
 }
 
