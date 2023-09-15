@@ -38,6 +38,9 @@ int main(int argc, char** argv) {
     } else {
         std::cout << "UNSATISFIABLE" << std::endl;
     }
+#if COLLECT_SOLVER_STATISTICS
+    s.solver_stats.print_statistics();
+#endif
 
     //s.print_clauses();
 

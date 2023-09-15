@@ -105,7 +105,7 @@ void Solver::setNumberOfVariables(int number) {
 std::optional<std::shared_ptr<Clause>> Solver::propagate() {
     while (!propagation_queue.empty()) {
 #if COLLECT_SOLVER_STATISTICS
-        ++solver_stats.number_of_propagated_literals;
+        ++solver_stats.statistics["number_of_propagated_literals"];
 #endif
         Literal_t literal = propagation_queue.front();
         // std::cout << "LEVEL " << current_decision_level() << ": Propagating " << dimacs_format(literal) << std::endl;
@@ -248,7 +248,7 @@ bool Solver::solve() {
         number_of_conflicts_until_restart *= 1.5;
         max_learnt_clauses *= 1.1;
 #if COLLECT_SOLVER_STATISTICS
-        ++solver_stats.number_of_restarts;
+        ++solver_stats.statistics["number_of_restarts"];
 #endif
     }
     return status == TRUE;
@@ -262,7 +262,7 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
             // Conflict handling
             ++conflict_counter;
 #if COLLECT_SOLVER_STATISTICS
-            ++solver_stats.number_of_conflicts;
+            ++solver_stats.statistics["number_of_conflicts"];
 #endif
             // std::cout << "Conflict in " << *conflicting_clause.value() << std::endl;
             if (current_decision_level() == 0) {
@@ -296,7 +296,7 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
             // std::cout << "LEVEL " << current_decision_level() + 1 << ": Assuming " << dimacs_format(next_assumption) << std::endl;
             assume(next_assumption);
 #if COLLECT_SOLVER_STATISTICS
-            ++solver_stats.number_of_decisions;
+            ++solver_stats.statistics["number_of_decisions"];
 #endif
         }
     }
@@ -363,7 +363,7 @@ void Solver::reduce_learnt_clauses() {
     });
     learnt_clauses.erase(result, learnt_clauses.end());
 #if COLLECT_SOLVER_STATISTICS
-    solver_stats.number_of_deleted_clauses = learnt_clauses.end() - result;
+    solver_stats.statistics["number_of_deleted_clauses"] = learnt_clauses.end() - result;
 #endif
 }
 
@@ -374,7 +374,7 @@ bool Solver::preprocess() {
         }
         auto erased_clauses = std::erase_if(clauses, [this](auto clause) { return clause->simplify(*this); });
 #if COLLECT_SOLVER_STATISTICS
-        solver_stats.clauses_deleted_during_preprocessing = erased_clauses;
+        solver_stats.statistics["clauses_deleted_during_preprocessing"] = erased_clauses;
 #endif
     }
     std::cout << "finished preprocessing" << std::endl;
