@@ -53,6 +53,7 @@ public:
 
     // Assignments
     std::vector<lbool> assignments; // variable indexed
+    std::vector<lbool> saved_phases; // variable indexed
     std::vector<Literal_t> trail;
     /**
      * Assign a value to a variable. To be used during preprocessing. In search, use Solver::enqueue()
