@@ -102,6 +102,7 @@ void Solver::setNumberOfVariables(int number) {
     var_activities.reserve(number);
     for (; number > 0; --number) {
         assignments.push_back(UNASSIGNED);
+        saved_phases.push_back(UNASSIGNED);
         decision_levels.push_back(DECISION_LEVEL_UNASSIGNED);
         antecedent_clauses.emplace_back();
         watch_lists.emplace_back();
@@ -167,7 +168,11 @@ int Solver::current_decision_level() const {
 
 bool Solver::assume(Literal_t literal) {
     trail_limits.push_back(trail.size());
-    return enqueue(literal);
+    if (saved_phases[var_index(literal)] == FALSE) {
+        return enqueue(negate_literal(literal));
+    } else {
+        return enqueue(literal);
+    }
 }
 
 // Warning: changes the content of conflicting clause
@@ -443,6 +448,7 @@ bool Solver::preprocess() {
 
 void Solver::assign(Literal_t lit) {
     assignments[var_index(lit)] = lsign(lit);
+    saved_phases[var_index(lit)] = lsign(lit);
     trail.push_back(lit);
     decision_levels[var_index(lit)] = current_decision_level();
 }
