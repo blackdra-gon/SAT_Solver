@@ -5,6 +5,8 @@
 #ifndef SAT_SOLVER_SOLVER_H
 #define SAT_SOLVER_SOLVER_H
 
+#define COLLECT_SOLVER_STATISTICS true
+
 #include <vector>
 #include <queue>
 #include <optional>
@@ -14,6 +16,9 @@
 #include "clause.h"
 #include "clauseRef.h"
 #include "variable_order.h"
+#if COLLECT_SOLVER_STATISTICS
+    #include "Solver_Stats.h"
+#endif
 
 using Watchlists = std::vector<std::vector<std::reference_wrapper<Clause>>>;
 
@@ -64,7 +69,6 @@ public:
     std::vector<int> decision_levels; // variable indexed
 
     // Variable ordering
-    VariableOrder variableOrder;
     std::vector<double> var_activities; // variable indexed
     void bumpVariable(Variable_t var);
     void decayActivities();
@@ -158,8 +162,13 @@ public:
      */
     std::vector<Literal_t> resolve(const Clause_ptr &a, const Clause_ptr& b, Variable_t var);
     void delete_occurrence_lists();
+#if COLLECT_SOLVER_STATISTICS
+    Solver_Stats solver_stats;
+#endif
 private:
     bool contains_true_literal(const std::shared_ptr<Clause>& clause);
+
+
 };
 
 #endif //SAT_SOLVER_SOLVER_H
