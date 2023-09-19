@@ -47,11 +47,11 @@ std::ostream &operator<<(std::ostream &os, const std::vector<Literal_t> &output)
 }
 
 bool operator<=(const std::vector<Literal_t> &a, const std::vector<Literal_t> &b) {
-    std::vector<Literal_t> a_copy = {}, b_copy = {};
-    std::copy(a.begin(), a.end(), std::back_inserter(a_copy));
-    std::copy(b.begin(), b.end(), std::back_inserter(b_copy));
-    std::sort(a_copy.begin(), a_copy.end());
-    std::sort(b_copy.begin(), b_copy.end());
-    return std::includes(b_copy.begin(), b_copy.end(), a_copy.begin(), a_copy.end());
+    for (auto literal: a) {
+        if (std::find(b.begin(), b.end(), literal) == b.end()) {
+            return false;
+        }
+    }
+    return true;
 }
 
