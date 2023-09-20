@@ -239,11 +239,13 @@ void Solver::backtrack_one_level() {
 }
 
 void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
+    // Temporary clause for signature subsumption test
+    Clause new_clause(clause);
     // Try Backward Subsumption on the last learnt clauses
     uint nof_clauses_to_lock_back = std::min(size_t(10), learnt_clauses.size());
     auto last_learnt_clauses = learnt_clauses.end() - nof_clauses_to_lock_back;
     auto remove = std::remove_if(last_learnt_clauses, learnt_clauses.end(),
-                   [&clause](Clause_ptr& c) { return clause <= c->literals; });
+                   [&new_clause](Clause_ptr& c) { return new_clause <= *c ;});
 #if COLLECT_SOLVER_STATISTICS
     auto nof_learned_clauses_before = learnt_clauses.size();
 #endif
@@ -256,17 +258,19 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
     for (int i = learnt_clauses.size() - nof_clauses_to_lock_back; i < learnt_clauses.size(); ++i) {
 
         for (int j = 0; j < clause.size(); ++j) {
-            std::vector<Literal_t> modified_clause(clause);
-            modified_clause[j] = negate_literal(modified_clause[j]);
-            std::vector<Literal_t> &learnt_clause_literals = learnt_clauses[i]->literals;
-            if (modified_clause <= learnt_clause_literals) {
+            std::vector<Literal_t> modified_clause_literals(clause);
+            modified_clause_literals[j] = negate_literal(modified_clause_literals[j]);
+            Clause modified_clause(modified_clause_literals);
+            //Clause modified_clause_literals
+            auto &learnt_clause = learnt_clauses[i];
+            if (modified_clause <= *learnt_clause) {
                 /*std::cout << "Selfsubsuming resolution can be applied:" << std::endl;
                 std::cout << "Newly learnt clause: " << clause << std::endl;
-                std::cout << "Recently learnt clause: " << learnt_clause_literals << std::endl;
-                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause[j]) << std::endl;*/
+                std::cout << "Recently learnt clause: " << learnt_clause << std::endl;
+                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause_literals[j]) << std::endl;*/
                 // Has to keep watchlists intact
-                auto literal_to_remove = std::ranges::find(learnt_clause_literals, modified_clause[j]);
-                auto index = literal_to_remove - learnt_clause_literals.begin();
+                auto literal_to_remove = std::ranges::find(learnt_clause->literals, modified_clause_literals[j]);
+                auto index = literal_to_remove - learnt_clause->literals.begin();
                 bool literal_can_be_removed = true;
                 if (index == 0 || index == 1) {
                     if (!learnt_clauses[i]->find_new_literal_to_watch(*this, index)) {
@@ -274,7 +278,7 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
                     }
                 }
                 if (literal_can_be_removed) {
-                    std::erase(learnt_clauses[i]->literals, modified_clause[j]);
+                    std::erase(learnt_clauses[i]->literals, modified_clause_literals[j]);
                     // clause changed, need to reset signature
                     learnt_clauses[i]->set_signature();
 #if COLLECT_SOLVER_STATISTICS
@@ -286,12 +290,12 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
                     ++solverStats.statistics["literals_not_deleted_because_of_watchlist"];
 #endif
                 }
-            } else if (learnt_clause_literals <= modified_clause) {
+            } else if (*learnt_clause <= modified_clause) {
                 /*std::cout << "Newly learnt clause can be strengthend" << std::endl;
                 std::cout << "Newly learnt clause: " << clause << std::endl;
-                std::cout << "Recently learnt clause: " << learnt_clause_literals << std::endl;
-                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause[j]) << std::endl;*/
-                std::erase(clause, modified_clause[j]);
+                std::cout << "Recently learnt clause: " << learnt_clause << std::endl;
+                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause_literals[j]) << std::endl;*/
+                std::erase(clause, modified_clause_literals[j]);
 #if COLLECT_SOLVER_STATISTICS
                 ++solverStats.statistics["literals_deleted_from_newly_learned_clauses_with_ssr"];
 #endif
