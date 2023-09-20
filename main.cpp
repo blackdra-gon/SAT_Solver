@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
         std::cout << "UNSATISFIABLE" << std::endl;
     }
 #if COLLECT_SOLVER_STATISTICS
-    s.solver_stats.print_statistics();
+    solverStats.print_statistics();
 #endif
 
     //s.print_clauses();

@@ -18,6 +18,8 @@
 #include "variable_order.h"
 #if COLLECT_SOLVER_STATISTICS
     #include "Solver_Stats.h"
+
+    extern Solver_Stats solverStats;
 #endif
 
 using Watchlists = std::vector<std::vector<std::reference_wrapper<Clause>>>;

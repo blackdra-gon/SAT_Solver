@@ -85,7 +85,7 @@ bool Clause::simplify(Solver &s) {
         //}
     }
 #if COLLECT_SOLVER_STATISTICS
-    s.solver_stats.statistics["literals_deleted_during_preprocessing"] += literals.size() - j;
+    solverStats.statistics["literals_deleted_during_preprocessing"] += literals.size() - j;
 #endif
     literals.erase(std::next(literals.begin(), j), literals.end());
     set_signature();

@@ -12,6 +12,7 @@
 #include "clause.h"
 #include "encoding_util.h"
 
+Solver_Stats solverStats;
 
 bool Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
     if (literals.empty()) {
@@ -113,7 +114,7 @@ void Solver::setNumberOfVariables(int number) {
 std::optional<std::shared_ptr<Clause>> Solver::propagate() {
     while (!propagation_queue.empty()) {
 #if COLLECT_SOLVER_STATISTICS
-        ++solver_stats.statistics["number_of_propagated_literals"];
+        ++solverStats.statistics["number_of_propagated_literals"];
 #endif
         Literal_t literal = propagation_queue.front();
         // std::cout << "LEVEL " << current_decision_level() << ": Propagating " << dimacs_format(literal) << std::endl;
@@ -248,7 +249,7 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
 #endif
     learnt_clauses.erase(remove, learnt_clauses.end());
 #if COLLECT_SOLVER_STATISTICS
-    solver_stats.statistics["clauses_deleted_during_inprocessing_subsumption"] += nof_learned_clauses_before - learnt_clauses.size();
+    solverStats.statistics["clauses_deleted_during_inprocessing_subsumption"] += nof_learned_clauses_before - learnt_clauses.size();
 #endif
 
     // Try Selfsubsuming resolution with the last learnt clauses
@@ -277,12 +278,12 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
                     // clause changed, need to reset signature
                     learnt_clauses[i]->set_signature();
 #if COLLECT_SOLVER_STATISTICS
-                    ++solver_stats.statistics["literals_deleted_from_recently_learned_clauses_with_ssr"];
+                    ++solverStats.statistics["literals_deleted_from_recently_learned_clauses_with_ssr"];
 #endif
                 } else {
                     // std::cout << "literal was not deleted, because no new literal to watch was found" << std::endl;
 #if COLLECT_SOLVER_STATISTICS
-                    ++solver_stats.statistics["literals_not_deleted_because_of_watchlist"];
+                    ++solverStats.statistics["literals_not_deleted_because_of_watchlist"];
 #endif
                 }
             } else if (learnt_clause_literals <= modified_clause) {
@@ -292,7 +293,7 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
                 std::cout << "Literal to resolve on: " << dimacs_format(modified_clause[j]) << std::endl;*/
                 std::erase(clause, modified_clause[j]);
 #if COLLECT_SOLVER_STATISTICS
-                ++solver_stats.statistics["literals_deleted_from_newly_learned_clauses_with_ssr"];
+                ++solverStats.statistics["literals_deleted_from_newly_learned_clauses_with_ssr"];
 #endif
             }
         }
@@ -317,7 +318,7 @@ bool Solver::solve() {
         number_of_conflicts_until_restart *= 1.5;
         max_learnt_clauses *= 1.1;
 #if COLLECT_SOLVER_STATISTICS
-        ++solver_stats.statistics["number_of_restarts"];
+        ++solverStats.statistics["number_of_restarts"];
 #endif
     }
     return status == TRUE;
@@ -331,7 +332,7 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
             // Conflict handling
             ++conflict_counter;
 #if COLLECT_SOLVER_STATISTICS
-            ++solver_stats.statistics["number_of_conflicts"];
+            ++solverStats.statistics["number_of_conflicts"];
 #endif
             // std::cout << "Conflict in " << *conflicting_clause.value() << std::endl;
             if (current_decision_level() == 0) {
@@ -365,7 +366,7 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
             // std::cout << "LEVEL " << current_decision_level() + 1 << ": Assuming " << dimacs_format(next_assumption) << std::endl;
             assume(next_assumption);
 #if COLLECT_SOLVER_STATISTICS
-            ++solver_stats.statistics["number_of_decisions"];
+            ++solverStats.statistics["number_of_decisions"];
 #endif
         }
     }
@@ -433,7 +434,7 @@ void Solver::reduce_learnt_clauses() {
     });
     learnt_clauses.erase(result, learnt_clauses.end());
 #if COLLECT_SOLVER_STATISTICS
-    solver_stats.statistics["number_of_deleted_clauses"] += size_before - learnt_clauses.size();
+    solverStats.statistics["number_of_deleted_clauses"] += size_before - learnt_clauses.size();
 #endif
 }
 
@@ -444,7 +445,7 @@ bool Solver::preprocess() {
         }
         auto erased_clauses = std::erase_if(clauses, [this](auto clause) { return clause->simplify(*this); });
 #if COLLECT_SOLVER_STATISTICS
-        solver_stats.statistics["clauses_deleted_during_preprocessing"] = erased_clauses;
+        solverStats.statistics["clauses_deleted_during_preprocessing"] = erased_clauses;
 #endif
     }
     std::cout << "finished preprocessing" << std::endl;
