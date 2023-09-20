@@ -26,7 +26,10 @@ public:
             // ssr = self-subsuming resolution
             {"literals_deleted_from_newly_learned_clauses_with_ssr",    0},
             {"literals_deleted_from_recently_learned_clauses_with_ssr", 0},
-            {"literals_not_deleted_because_of_watchlist",               0}
+            {"literals_not_deleted_because_of_watchlist",               0},
+            {"subset_check_fast", 0},
+            {"subset_check_slow", 0}
+
     };
 
     void print_statistics();

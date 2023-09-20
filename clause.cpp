@@ -94,8 +94,14 @@ bool Clause::simplify(Solver &s) {
 
 bool Clause::operator<=(const Clause &other) const {
     if ((signature & ~other.signature) != 0) {
+#if COLLECT_SOLVER_STATISTICS
+        ++solverStats.statistics["subset_check_fast"];
+#endif
         return false;
     }
+#if COLLECT_SOLVER_STATISTICS
+    ++solverStats.statistics["subset_check_slow"];
+#endif
     return literals <= other.literals;
 }
 
