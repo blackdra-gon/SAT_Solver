@@ -340,9 +340,10 @@ void Solver::bumpVariable(Variable_t var) {
 }
 
 void Solver::decayActivities() {
-    //for (auto &activity: var_activities)
-    std::ranges::for_each(var_activities, [](double &d) { d *= 0.95;});
-    for (auto clause: learnt_clauses) {
+    for (auto &activity_value: var_activities) {
+        activity_value *= 0.95;
+    }
+    for (const auto& clause: learnt_clauses) {
         clause->activity *= 0.999;
     }
 }
