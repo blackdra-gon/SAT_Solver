@@ -69,8 +69,10 @@ public:
 
     // Variable ordering
     std::vector<double> var_activities; // variable indexed
+    std::vector<Variable_t> var_order; // pop_back returns the next variable to assign
     void bumpVariable(Variable_t var);
     void decayActivities();
+    void sortVariables();
     // To be replaced with VariableOrder
     Literal_t next_unassigned_variable();
 

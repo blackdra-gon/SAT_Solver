@@ -98,6 +98,7 @@ void Solver::setNumberOfVariables(int number) {
         watch_lists.emplace_back();
         watch_lists.emplace_back();
         var_activities.push_back(1);
+        var_order.push_back(number - 1);
     }
 
 }
@@ -211,7 +212,7 @@ void Solver::pop_trail() {
     assignments[x] = UNASSIGNED;
     antecedent_clauses[x] = std::nullopt;
     decision_levels[x] = DECISION_LEVEL_UNASSIGNED;
-    // order.undo(x);
+    var_order.push_back(x);
     trail.pop_back();
 }
 
@@ -275,6 +276,7 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
             backtrack_until(backtrack_level);
             // std::cout << "Learnt clause: " << learnt_clause << std::endl;
             record_learnt_clause(learnt_clause);
+            sortVariables();
             decayActivities();
         } else {
             // No conflict
@@ -303,7 +305,7 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
 }
 
 Literal_t Solver::next_unassigned_variable() {
-    double max_activity = 0;
+    /*double max_activity = 0;
     Variable_t max_index = UINT32_MAX;
     for (int i = 0; i < assignments.size(); ++i) {
         if (assignments[i] == UNASSIGNED) {
@@ -312,8 +314,9 @@ Literal_t Solver::next_unassigned_variable() {
                 max_index = i;
             }
         }
-    }
-    return max_index << 1;
+    }*/
+    Variable_t next_var = var_order.back();
+    return next_var << 1;
 }
 
 void Solver::print_clauses() {
@@ -387,6 +390,7 @@ void Solver::assign(Literal_t lit) {
     assignments[var_index(lit)] = lsign(lit);
     trail.push_back(lit);
     decision_levels[var_index(lit)] = current_decision_level();
+    std::erase(var_order, var_index(lit));
 }
 
 void Solver::pure_literal_elimination() {
@@ -414,4 +418,8 @@ bool Solver::contains_true_literal(const std::shared_ptr<Clause>& clause) {
     return std::ranges::any_of(clause->literals, [this](Literal_t literal) {
         return value(literal) == TRUE;
     });
+}
+
+void Solver::sortVariables() {
+    std::stable_sort(var_order.begin(), var_order.end(), [this](Variable_t a, Variable_t b) { return var_activities[a] < var_activities[b];});
 }
