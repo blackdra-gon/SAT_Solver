@@ -40,7 +40,7 @@ bool import_from_file(std::string filename, Solver &solver) {
             case 3:
                 number_of_clauses = std::stoi(literal_str);
                 solver.clauses.reserve(number_of_clauses);
-                solver.learnt_clauses.reserve(number_of_clauses*2);
+                solver.learned_clauses.reserve(number_of_clauses * 2);
                 break;
             default:
                 std::cout << "parsing error" << std::endl;

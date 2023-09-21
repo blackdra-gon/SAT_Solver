@@ -26,15 +26,15 @@ bool Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
         // allocate clause
         auto clause = std::make_shared<Clause>(literals, learnt);
         // select vector to append to
-        auto &clause_vector = learnt ? learnt_clauses : clauses;
+        auto &clause_vector = learnt ? learned_clauses : clauses;
         clause_vector.push_back(clause);
 
         // Set BaseAddress for debugging purposes
         /*if (clauses.size() == 1) {
             ClauseRef::setClausesBaseAddress(&clauses[0]);
         }
-        if (learnt_clauses.size() == 1) {
-            ClauseRef::setLearntClausesBaseAddress(&learnt_clauses[0]);
+        if (learned_clauses.size() == 1) {
+            ClauseRef::setLearntClausesBaseAddress(&learned_clauses[0]);
         }*/
         if (learnt) {
             // pick second watch literal with the highest decision level
@@ -150,7 +150,7 @@ std::optional<std::shared_ptr<Clause>> Solver::propagate() {
  */
 bool Solver::addClauses(const std::vector<std::vector<int>>& clauses, bool learnt) {
     //clauses.reserve(input_clauses.size());
-    learnt_clauses.reserve(clauses.size() * 10);
+    learned_clauses.reserve(clauses.size() * 10);
     for (const auto& literal_list: clauses) {
         if (!addClause(internal_representation(literal_list), learnt)) {
             return false;
@@ -243,33 +243,32 @@ void Solver::backtrack_one_level() {
 void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
     // Temporary clause for signature subsumption test
     Clause new_clause(clause);
-    // Try Backward Subsumption on the last learnt clauses
-    uint nof_clauses_to_lock_back = std::min(size_t(10), learnt_clauses.size());
-    auto last_learnt_clauses = learnt_clauses.end() - nof_clauses_to_lock_back;
-    auto remove = std::remove_if(last_learnt_clauses, learnt_clauses.end(),
-                   [&new_clause](Clause_ptr& c) { return new_clause <= *c ;});
-#if COLLECT_SOLVER_STATISTICS
-    auto nof_learned_clauses_before = learnt_clauses.size();
+    uint nof_clauses_to_lock_back = std::min(size_t(10), learned_clauses.size());
+    auto index_to_look_back = learned_clauses.size() - nof_clauses_to_lock_back;
+    for (auto i = learned_clauses.size(); i > index_to_look_back; --i) {
+        auto &learned_clause = learned_clauses[i - 1];
+        // Try Backward Subsumption on the last learnt clauses
+        if (new_clause <= *learned_clause) {
+#if LOG_SEARCH
+            std::cout << "Deleting subsumed Clause: " << *learned_clause << std::endl;
 #endif
-    learnt_clauses.erase(remove, learnt_clauses.end());
+            std::erase(learned_clauses, learned_clause);
 #if COLLECT_SOLVER_STATISTICS
-    solverStats.statistics["clauses_deleted_during_inprocessing_subsumption"] += nof_learned_clauses_before - learnt_clauses.size();
+            ++solverStats.statistics["clauses_deleted_during_inprocessing_subsumption"];
 #endif
-
-    // Try Selfsubsuming resolution with the last learnt clauses
-    for (int i = learnt_clauses.size() - nof_clauses_to_lock_back; i < learnt_clauses.size(); ++i) {
-
+        }
+        // Try Selfsubsuming resolution with the last learnt clauses
         for (int j = 0; j < clause.size(); ++j) {
             std::vector<Literal_t> modified_clause_literals(clause);
             modified_clause_literals[j] = negate_literal(modified_clause_literals[j]);
             Clause modified_clause(modified_clause_literals);
-            //Clause modified_clause_literals
-            auto &learnt_clause = learnt_clauses[i];
-            if (*learnt_clause <= modified_clause) {
-                /*std::cout << "Newly learnt clause can be strengthend" << std::endl;
+            if (*learned_clause <= modified_clause) {
+#if LOG_SEARCH
+                std::cout << "Newly learnt clause can be strengthend" << std::endl;
                 std::cout << "Newly learnt clause: " << clause << std::endl;
-                std::cout << "Recently learnt clause: " << learnt_clause << std::endl;
-                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause_literals[j]) << std::endl;*/
+                std::cout << "Recently learnt clause: " << learned_clause << std::endl;
+                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause_literals[j]) << std::endl;
+#endif
                 std::erase(clause, modified_clause_literals[j]);
 #if COLLECT_SOLVER_STATISTICS
                 ++solverStats.statistics["literals_deleted_from_newly_learned_clauses_with_ssr"];
@@ -281,7 +280,7 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
     assert(!clause.empty());
     if (clause.size() > 1) {
         addClause(clause, true);
-        enqueue(clause[0], learnt_clauses.back());
+        enqueue(clause[0], learned_clauses.back());
     } else {
         //std::cout << "Learned clause with only one literal" << std::endl;
         enqueue(clause[0]);
@@ -339,7 +338,7 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
                 return TRUE;
             }
             // learnt clauses reach capacity
-            if (learnt_clauses.size() >= maximum_learnt_clauses) {
+            if (learned_clauses.size() >= maximum_learnt_clauses) {
                 reduce_learnt_clauses();
             }
             if (conflict_counter >= number_of_conflicts) {
@@ -377,9 +376,9 @@ void Solver::print_clauses() {
     for (const auto& clause: clauses) {
         std::cout << *clause << std::endl;
     }
-    if (!learnt_clauses.empty()) {
+    if (!learned_clauses.empty()) {
         std::cout << "Learnt Clauses:" << std::endl;
-        for (const auto& clause: learnt_clauses) {
+        for (const auto& clause: learned_clauses) {
             std::cout << *clause << std::endl;
         }
     }
@@ -400,7 +399,7 @@ void Solver::decayActivities() {
     for (auto &activity_value: var_activities) {
         activity_value *= 0.95;
     }
-    for (const auto& clause: learnt_clauses) {
+    for (const auto& clause: learned_clauses) {
         clause->activity *= 0.999;
     }
 }
@@ -411,18 +410,18 @@ void Solver::bumpClause(const std::shared_ptr<Clause>& clause) {
 
 void Solver::reduce_learnt_clauses() {
     // std::cout << "Reduce set of learnt Clauses" << std::endl;
-    std::ranges::sort(learnt_clauses, [](const std::shared_ptr<Clause>& a, const std::shared_ptr<Clause>& b) {
+    std::ranges::sort(learned_clauses, [](const std::shared_ptr<Clause>& a, const std::shared_ptr<Clause>& b) {
         return a->activity > b->activity;
     });
-    auto size_before = learnt_clauses.size();
+    auto size_before = learned_clauses.size();
     size_t middle = size_before / 2;
-    auto half_learnt_clause = std::next(learnt_clauses.begin(), middle);
-    auto result = std::remove_if(half_learnt_clause, learnt_clauses.end(), [this](const std::shared_ptr<Clause>& c) {
+    auto half_learnt_clause = std::next(learned_clauses.begin(), middle);
+    auto result = std::remove_if(half_learnt_clause, learned_clauses.end(), [this](const std::shared_ptr<Clause>& c) {
         return !c->locked(*this);
     });
-    learnt_clauses.erase(result, learnt_clauses.end());
+    learned_clauses.erase(result, learned_clauses.end());
 #if COLLECT_SOLVER_STATISTICS
-    solverStats.statistics["number_of_deleted_clauses"] += size_before - learnt_clauses.size();
+    solverStats.statistics["number_of_deleted_clauses"] += size_before - learned_clauses.size();
 #endif
 }
 

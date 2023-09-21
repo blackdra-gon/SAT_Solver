@@ -15,8 +15,8 @@ void check_assignments(Solver &s, std::vector<lbool> expected_values) {
 /**
  *
  * @param s                 solver
- * @param expected_clauses  Takes the indeces of the clause in the watchlist as parameter. Uses negative values for the
- *                          indices of learnt clauses (starts to count them by 1: -1 means learnt_clauses[0]
+ * @param expected_clauses  Takes the indices of the clause in the watchlist as parameter. Uses negative values for the
+ *                          indices of learnt clauses (starts to count them by 1: -1 means learned_clauses[0]
  */
 void check_watchlists(Solver &s, const std::vector<std::vector<int>>& expected_clauses) {
     if (s.watch_lists.size() != expected_clauses.size()) {
@@ -33,7 +33,7 @@ void check_watchlists(Solver &s, const std::vector<std::vector<int>>& expected_c
             if (clause_index >= 0) {
                 CHECK(s.watch_lists[i][j].lock() == s.clauses[clause_index]);
             } else {
-                CHECK(s.watch_lists[i][j].lock() == s.learnt_clauses[-clause_index - 1]);
+                CHECK(s.watch_lists[i][j].lock() == s.learned_clauses[-clause_index - 1]);
             }
         }
     }
@@ -45,7 +45,7 @@ void check_clauses(Solver &s, const std::vector<std::vector<int>>& expected_clau
         expected.emplace_back(internal_representation(clause));
     }
     int i = 0;
-    auto clause_vector = learnt ? s.learnt_clauses : s.clauses;
+    auto clause_vector = learnt ? s.learned_clauses : s.clauses;
     for (const auto& clause_ptr: clause_vector) {
         CHECK(*clause_ptr <= expected[i]);
         CHECK( expected[i] <= *clause_ptr);
