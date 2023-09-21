@@ -338,3 +338,11 @@ TEST_CASE("Simple Subsumption Demo") {
     s.addClauses({{-1,-2,-3,-4}, {-1,-2,-3,4}, {-1,-2,3,-4}, {-1,-2,3,4}});
     s.solve();
 }
+
+TEST_CASE("Activity base variable ordering") {
+    Solver s;
+    s.setNumberOfVariables(7);
+    s.addClauses({{-1,-2,-5,-7}, {-1,-2,-5,7}, {-1,-2,5,-7}, {-1,-2,5,7}, {6,4,3}});
+    s.solve();
+    check_trail(s, {1,-2,5,3,4,6,7});
+}
