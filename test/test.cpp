@@ -347,3 +347,11 @@ TEST_CASE("Strengthening new learned clauses with self subsuming resolution") {
     s.record_learnt_clause(learned_clause);
     check_clauses(s, {{4,7,5}, {1,5,7}});
 }
+
+
+TEST_CASE("Simple Subsumption Demo") {
+    Solver s;
+    s.setNumberOfVariables(4);
+    s.addClauses({{-1,-2,-3,-4}, {-1,-2,-3,4}, {-1,-2,3,-4}, {-1,-2,3,4}});
+    s.solve();
+}

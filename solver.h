@@ -7,6 +7,8 @@
 
 #define COLLECT_SOLVER_STATISTICS true
 
+#define LOG_SEARCH true
+
 #include <vector>
 #include <queue>
 #include <optional>

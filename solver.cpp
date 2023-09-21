@@ -117,7 +117,9 @@ std::optional<std::shared_ptr<Clause>> Solver::propagate() {
         ++solverStats.statistics["number_of_propagated_literals"];
 #endif
         Literal_t literal = propagation_queue.front();
-        // std::cout << "LEVEL " << current_decision_level() << ": Propagating " << dimacs_format(literal) << std::endl;
+#if LOG_SEARCH
+        std::cout << "LEVEL " << current_decision_level() << ": Propagating " << dimacs_format(literal) << std::endl;
+#endif
         propagation_queue.pop();
         auto tmp_watchlist = watch_lists[literal];
         watch_lists[literal].clear();
@@ -338,23 +340,29 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
 #if COLLECT_SOLVER_STATISTICS
             ++solverStats.statistics["number_of_conflicts"];
 #endif
-            // std::cout << "Conflict in " << *conflicting_clause.value() << std::endl;
+#if LOG_SEARCH
+            std::cout << "Conflict in " << *conflicting_clause.value() << std::endl;
+#endif
             if (current_decision_level() == 0) {
                 return FALSE;
             }
             std::vector<Literal_t> learnt_clause;
             int backtrack_level = 0;
             analyse_conflict(conflicting_clause.value(), learnt_clause, backtrack_level);
-            // std::cout << "Backtrack to level " << backtrack_level << std::endl;
+#if LOG_SEARCH
+            std::cout << "Backtrack to level " << backtrack_level << std::endl;
+            std::cout << "Learnt clause: " << learnt_clause << std::endl;
+#endif
             backtrack_until(backtrack_level);
-            // std::cout << "Learnt clause: " << learnt_clause << std::endl;
             record_learnt_clause(learnt_clause);
             decayActivities();
         } else {
             // No conflict
             if (trail.size() == assignments.size()) {
                 // All variables are assigned
-                // std::cout << "Satisfying assignment found: " << trail << std::endl;
+#if LOG_SEARCH
+                std::cout << "Satisfying assignment found: " << trail << std::endl;
+#endif
                 return TRUE;
             }
             // learnt clauses reach capacity
@@ -367,7 +375,9 @@ lbool Solver::search(uint32_t number_of_conflicts, uint32_t maximum_learnt_claus
             }
             // Take new assumption
             Literal_t next_assumption = next_unassigned_variable();
-            // std::cout << "LEVEL " << current_decision_level() + 1 << ": Assuming " << dimacs_format(next_assumption) << std::endl;
+#if LOG_SEARCH
+            std::cout << "LEVEL " << current_decision_level() + 1 << ": Assuming " << dimacs_format(next_assumption) << std::endl;
+#endif
             assume(next_assumption);
 #if COLLECT_SOLVER_STATISTICS
             ++solverStats.statistics["number_of_decisions"];
