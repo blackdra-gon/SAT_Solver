@@ -289,23 +289,6 @@ TEST_CASE("Backward Subsumption on last learnt clauses") {
     check_clauses(s, {{-4,-5}, {-1,-3,-5}, {2,3,-4}, {1,2}}, true);
 }
 
-TEST_CASE("Selfsubsuming resolution on last learnt clauses") {
-    Solver s;
-    s.setNumberOfVariables(25);
-    s.addClauses({{5, -7, 13, 8, 23}, {-5, -7, 13, 8, 23}}, true);
-    std::vector<Literal_t> learned_clause = internal_representation({5, -7, -13, 23});
-    s.record_learnt_clause(learned_clause);
-    check_clauses(s, {{5,-7,8,23}, {-5,-7,13,8,23}, {5,-7,-13,23}}, true);
-    // resolve on a watched literal:
-    Solver s1;
-    s1.setNumberOfVariables(25);
-    // The first two literals of the learnt clauses are swapped, because decision levels are not set
-    s1.addClauses({{-5, 13, 8, 23, -7}, {5, 13, -7, 8, 23}}, true);
-    std::vector<Literal_t> learned_clause_1 = internal_representation({5, -7, -13, 23});
-    s1.record_learnt_clause(learned_clause_1);
-    check_clauses(s1, {{-5,-7,13,8,23}, {5,-7,8,23}, {5,-7,-13,23}}, true);
-}
-
 TEST_CASE("Replace watched literal") {
     Solver s;
     s.setNumberOfVariables(5);

@@ -265,34 +265,7 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
             Clause modified_clause(modified_clause_literals);
             //Clause modified_clause_literals
             auto &learnt_clause = learnt_clauses[i];
-            if (modified_clause <= *learnt_clause) {
-                /*std::cout << "Selfsubsuming resolution can be applied:" << std::endl;
-                std::cout << "Newly learnt clause: " << clause << std::endl;
-                std::cout << "Recently learnt clause: " << learnt_clause << std::endl;
-                std::cout << "Literal to resolve on: " << dimacs_format(modified_clause_literals[j]) << std::endl;*/
-                // Has to keep watchlists intact
-                auto literal_to_remove = std::ranges::find(learnt_clause->literals, modified_clause_literals[j]);
-                auto index = literal_to_remove - learnt_clause->literals.begin();
-                bool literal_can_be_removed = true;
-                if (index == 0 || index == 1) {
-                    if (!learnt_clauses[i]->find_new_literal_to_watch(*this, index)) {
-                        literal_can_be_removed = false;
-                    }
-                }
-                if (literal_can_be_removed) {
-                    std::erase(learnt_clauses[i]->literals, modified_clause_literals[j]);
-                    // clause changed, need to reset signature
-                    learnt_clauses[i]->set_signature();
-#if COLLECT_SOLVER_STATISTICS
-                    ++solverStats.statistics["literals_deleted_from_recently_learned_clauses_with_ssr"];
-#endif
-                } else {
-                    // std::cout << "literal was not deleted, because no new literal to watch was found" << std::endl;
-#if COLLECT_SOLVER_STATISTICS
-                    ++solverStats.statistics["literals_not_deleted_because_of_watchlist"];
-#endif
-                }
-            } else if (*learnt_clause <= modified_clause) {
+            if (*learnt_clause <= modified_clause) {
                 /*std::cout << "Newly learnt clause can be strengthend" << std::endl;
                 std::cout << "Newly learnt clause: " << clause << std::endl;
                 std::cout << "Recently learnt clause: " << learnt_clause << std::endl;
