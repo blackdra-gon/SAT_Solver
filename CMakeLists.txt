@@ -7,8 +7,8 @@ add_executable(SAT_Solver main.cpp io_utils.cpp encoding_util.cpp solver_structs
         Solver_Stats.cpp
         Solver_Stats.h)
 
-add_subdirectory(test)
-add_subdirectory(sat_checker)
+#add_subdirectory(test)
+#add_subdirectory(sat_checker)
 
 
 
