@@ -5,7 +5,7 @@
 #ifndef SAT_SOLVER_SOLVER_H
 #define SAT_SOLVER_SOLVER_H
 
-#define COLLECT_SOLVER_STATISTICS true
+#define COLLECT_SOLVER_STATISTICS false
 
 #define LOG_SEARCH false
 
