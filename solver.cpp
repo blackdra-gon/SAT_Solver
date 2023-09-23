@@ -12,9 +12,7 @@
 #include "clause.h"
 #include "encoding_util.h"
 
-#if COLLECT_SOLVER_STATISTICS
 Solver_Stats solverStats;
-#endif
 
 bool Solver::addClause(const std::vector<Literal_t> &literals, bool learnt) {
     if (literals.empty()) {
