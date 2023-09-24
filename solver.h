@@ -5,10 +5,6 @@
 #ifndef SAT_SOLVER_SOLVER_H
 #define SAT_SOLVER_SOLVER_H
 
-#define COLLECT_SOLVER_STATISTICS true
-
-#define LOG_SEARCH false
-
 #include <vector>
 #include <queue>
 #include <optional>
