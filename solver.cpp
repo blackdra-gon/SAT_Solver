@@ -243,7 +243,7 @@ void Solver::backtrack_one_level() {
 void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
     // Temporary clause for signature subsumption test
     Clause new_clause(clause);
-    uint nof_clauses_to_lock_back = std::min(size_t(10), learned_clauses.size());
+    uint nof_clauses_to_lock_back = std::min(size_t(LOOKBACK_N_CLAUSES), learned_clauses.size());
     auto index_to_look_back = learned_clauses.size() - nof_clauses_to_lock_back;
     for (auto i = learned_clauses.size(); i > index_to_look_back; --i) {
         auto &learned_clause = learned_clauses[i - 1];
