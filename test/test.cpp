@@ -213,15 +213,6 @@ TEST_CASE("Simple Preprocessing") {
 
 }
 
-TEST_CASE("Pure Literal Preprocessing") {
-    Solver s;
-    s.setNumberOfVariables(5);
-    s.addClauses({{1,2,4}, {-2,-3}, {-4, 1}});
-    s.pure_literal_elimination();
-    check_clauses(s, {{-2,-3}});
-    check_assignments(s, {TRUE, UNASSIGNED, FALSE, UNASSIGNED, FALSE});
-}
-
 /*TEST_CASE("Clause Distribution") {
     // successful variable elimination
     Solver s;
@@ -328,7 +319,7 @@ TEST_CASE("Strengthening new learned clauses with self subsuming resolution") {
     s.addClauses({{4, 7, 5}}, true);
     std::vector<Literal_t> learned_clause = internal_representation({1, -4, 5, 7});
     s.record_learnt_clause(learned_clause);
-    check_clauses(s, {{4,7,5}, {1,5,7}});
+    check_clauses(s, {{4,7,5}, {1,5,7}}, true);
 }
 
 

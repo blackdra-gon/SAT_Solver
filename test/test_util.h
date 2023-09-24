@@ -46,6 +46,7 @@ void check_clauses(Solver &s, const std::vector<std::vector<int>>& expected_clau
     }
     int i = 0;
     auto clause_vector = learnt ? s.learned_clauses : s.clauses;
+    CHECK(clause_vector.size() == expected.size());
     for (const auto& clause_ptr: clause_vector) {
         CHECK(*clause_ptr <= expected[i]);
         CHECK( expected[i] <= *clause_ptr);
