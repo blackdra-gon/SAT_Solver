@@ -266,10 +266,10 @@ void Solver::record_learnt_clause(std::vector<Literal_t> &clause) {
 #if LOG_SEARCH
                 std::cout << "Newly learnt clause can be strengthend" << std::endl;
                 std::cout << "Newly learnt clause: " << clause << std::endl;
-                std::cout << "Recently learnt clause: " << learned_clause << std::endl;
+                std::cout << "Recently learnt clause: " << *learned_clause << std::endl;
                 std::cout << "Literal to resolve on: " << dimacs_format(modified_clause_literals[j]) << std::endl;
 #endif
-                std::erase(clause, modified_clause_literals[j]);
+                std::erase(clause, negate_literal(modified_clause_literals[j]));
 #if COLLECT_SOLVER_STATISTICS
                 ++solverStats.statistics["literals_deleted_from_newly_learned_clauses_with_ssr"];
 #endif
