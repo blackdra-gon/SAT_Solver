@@ -389,7 +389,7 @@ bool Solver::preprocess() {
         solver_stats.statistics["clauses_deleted_during_preprocessing"] = erased_clauses;
 #endif
     }
-    std::cout << "finished preprocessing" << std::endl;
+    //std::cout << "finished preprocessing" << std::endl;
     return true;
 }
 
