@@ -12,8 +12,6 @@
 #include <memory>
 #include "solver_structs.h"
 #include "clause.h"
-#include "clauseRef.h"
-#include "variable_order.h"
 #if COLLECT_SOLVER_STATISTICS
     #include "Solver_Stats.h"
 #endif

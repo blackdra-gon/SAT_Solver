@@ -1,1 +1,1 @@
-add_executable(SAT_checker checker.cpp ../io_utils.cpp ../solver.cpp ../clause.cpp ../clauseRef.cpp ../encoding_util.cpp ../solver_structs.cpp)
+add_executable(SAT_checker checker.cpp ../io_utils.cpp ../solver.cpp ../clause.cpp ../encoding_util.cpp ../solver_structs.cpp)

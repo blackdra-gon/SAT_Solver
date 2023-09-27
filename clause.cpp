@@ -7,7 +7,6 @@
 #include "clause.h"
 #include "solver.h"
 #include "encoding_util.h"
-#include "clauseRef.h"
 
 bool Clause::operator==(const Clause &other) const{
     return literals == other.literals;
@@ -45,13 +44,6 @@ std::ostream &operator<<(std::ostream &os, const Clause &output) {
     return os << output.literals;
 }
 
-
-
-
-
-bool Clause::operator==(const ClauseRef &other) const {
-    return *this == other.get();
-}
 
 void Clause::calc_reason(Solver &s, std::optional<Literal_t> l, std::vector<Literal_t> &out_reason) {
     int i = l ? 1 : 0;
