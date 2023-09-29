@@ -20,10 +20,14 @@ endif ()
 
 if (COLLECT_STATS)
     add_compile_definitions(-DCOLLECT_SOLVER_STATISTICS=1)
+else ()
+    add_compile_definitions(-DCOLLECT_SOLVER_STATISTICS=0)
 endif ()
 
 if (VERBOSE_LOGGING)
     add_compile_definitions(-DLOG_SEARCH=1)
+else ()
+    add_compile_definitions(-DLOG_SEARCH=0)
 endif ()
 
 add_definitions(-DLOOKBACK_N_CLAUSES=${INPROCESSING_LOOKBACK_N_CLAUSES})
