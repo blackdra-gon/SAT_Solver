@@ -20,6 +20,7 @@ bool import_from_file(std::string filename, Solver &solver) {
     } while (line[0] == 'c');
 
     int i = 0;
+    std::vector<Literal_t> extra_clause;
     std::stringstream stringStream(line);
     while (std::getline(stringStream, literal_str, ' ')) {
         switch (i) {
@@ -43,7 +44,13 @@ bool import_from_file(std::string filename, Solver &solver) {
                 solver.learnt_clauses.reserve(number_of_clauses*2);
                 break;
             default:
-                std::cout << "parsing error" << std::endl;
+                int literal = std::stoi(literal_str);
+                if (literal != 0) {
+                    extra_clause.push_back(internal_representation(literal));
+                } else {
+                    solver.addClause(extra_clause);
+                    extra_clause.clear();
+                }
                 break;
 
         }
