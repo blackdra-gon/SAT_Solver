@@ -49,16 +49,18 @@ bool import_from_file(std::string filename, Solver &solver) {
         }
         ++i;
     }
+    std::vector<Literal_t> clause;
     while (std::getline(in, line)) {
         std::stringstream stringStream(line);
-        std::vector<Literal_t> clause;
         while (std::getline(stringStream, literal_str, ' ')) {
             int literal = std::stoi(literal_str);
             if (literal != 0) {
                 clause.push_back(internal_representation(literal));
+            } else {
+                solver.addClause(clause);
+                clause.clear();
             }
         }
-        solver.addClause(clause);
 
     }
     return true;

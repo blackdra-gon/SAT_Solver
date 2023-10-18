@@ -25,6 +25,23 @@ TEST_CASE("Input") {
     CHECK(s.watch_lists[internal_representation(2)].front().lock() == s.clauses[0]);
 }
 
+TEST_CASE("Parsing over multiple lines") {
+    Solver s;
+    import_from_file("../../example_dimacs/unit_test_parse_multiple_lines.cnf", s);
+    std::vector<std::vector<int>> expected_clauses = {{-2, 4, 5, -1, 6, -7},
+                                                      {-1, -3, -5}, {4, 6, 8, 1, 5, -7}};
+    check_clauses(s, expected_clauses);
+}
+
+TEST_CASE("Parse Soerens dimacs files") {
+    Solver s;
+    import_from_file("../../example_dimacs/unit_test_parse_soeren_dimacs.cnf", s);
+    std::vector<std::vector<int>> expected_clauses = {{3, 2}, {-2, 4, 5}, {-1, 6, -7},
+                                                      {-1, -3, -5}, {4, 6, 8},
+                                                      {1, 5, -7}};
+    check_clauses(s, expected_clauses);
+}
+
 TEST_CASE("Solver propagation routine") {
     Solver s;
     s.setNumberOfVariables(3);
